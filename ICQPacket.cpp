@@ -232,13 +232,15 @@ int ICQPacket::Add_TLV_password(unsigned short Type,TCHAR *pszPassword)
 
 	return nPasswordLength+sizeof(TLV);
 }
+//! CreateLoginPacket
 //! \param nSequence [in] a Sequence
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN
 //! \param pszPassword [in] a pointer to a buffer that contains ICQ Password
 //! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 {
-	SetFLAPHeader(0x01,nSequence);
+	SetFLAPHeader(ICQ_CHANNEL_SIGNON,nSequence);
 
 	Add_u32_BE(0x00000001); // Version
 	Add_TLV_string(ICQ_TLV_UIN,pszUIN);
@@ -252,6 +254,16 @@ int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 	Add_TLV_u32(ICQ_TLV_DISTRIB_NUMBER,0x00005500);
 	Add_TLV_string(ICQ_TLV_CLIENT_LANG,TEXT("en"));
 	Add_TLV_string(ICQ_TLV_CLIENT_COUNTRY,TEXT("us"));
+
+	return nPacketSize;
+}
+//! CreateGoodByePacket
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
+int ICQPacket::CreateGoodByePacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SIGNOFF,nSequence);
 
 	return nPacketSize;
 }

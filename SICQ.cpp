@@ -137,8 +137,11 @@ void SICQ::ICQLogin()
 			SequenceIncrement();
 
 			icqpacket.Recv(sock);
-
 			icqpacket.GetTLV_string(ICQ_TLV_BOS_SERVER,szBuffer,sizeof(szBuffer)/sizeof(TCHAR));
+
+			icqpacket.CreateGoodByePacket(nSequence);
+			icqpacket.Send(sock);
+			SequenceIncrement();
 		}
 
 		nError=SICQ_ERROR_SUCCESS;
