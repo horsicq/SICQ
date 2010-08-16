@@ -45,6 +45,7 @@ public:
 	bool IsHelloPacket();
 	int CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
 	int CreateGoodByePacket(int nSequence);
+	int CreateSendCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
 	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
 	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
 	

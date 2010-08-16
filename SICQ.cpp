@@ -124,7 +124,10 @@ void SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPass
 void SICQ::ICQLogin()
 {
 	ICQPacket icqpacket;
-	TCHAR szBuffer[256];
+	TCHAR szBuffer[256],szBOSServer[64],*pszOffset;
+	char Cookies[256];
+	int nCookiesSize,nBOSServerPort;
+
 
 	sock=_socket();
 	if(_connect(sock,szServerIP,nServerPort))
@@ -137,11 +140,33 @@ void SICQ::ICQLogin()
 			SequenceIncrement();
 
 			icqpacket.Recv(sock);
+			nCookiesSize=icqpacket.GetTLV_blob(ICQ_TLV_AUTH_COOKIE,Cookies,sizeof(Cookies));
 			icqpacket.GetTLV_string(ICQ_TLV_BOS_SERVER,szBuffer,sizeof(szBuffer)/sizeof(TCHAR));
+			pszOffset=StrStr(szBuffer,_TEXT(":"));
+			pszOffset++;
+			lstrcpyn(szBOSServer,szBuffer,(pszOffset-szBuffer));
+			nBOSServerPort=StrToInt(pszOffset);
 
 			icqpacket.CreateGoodByePacket(nSequence);
 			icqpacket.Send(sock);
 			SequenceIncrement();
+
+			_closeconnect(sock);
+
+			// BOS Server Connection
+			sock=_socket();
+			if(_connect(sock,szBOSServer,nBOSServerPort))
+			{
+				icqpacket.Recv(sock);
+				if(icqpacket.IsHelloPacket())
+				{
+					icqpacket.CreateSendCookiesPacket(nSequence,Cookies,nCookiesSize);
+					icqpacket.Send(sock);
+					SequenceIncrement();
+
+					icqpacket.Recv(sock);
+				}
+			}
 		}
 
 		nError=SICQ_ERROR_SUCCESS;

@@ -11,3 +11,4 @@ SOCKET _socket();
 bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort);
 int _recv(SOCKET sock,char *pBuffer,int nBufferSize);
 int _send(SOCKET sock,char *pBuffer,int nBufferSize);
+void _closeconnect(SOCKET sock);

@@ -67,3 +67,10 @@ int _send(SOCKET sock,char *pBuffer,int nBufferSize)
 {
 	return send(sock,pBuffer,nBufferSize,0);
 }
+//! Close connection
+//! \param sock [in] a descriptor identifying a connected socket
+void _closeconnect(SOCKET sock)
+{
+	shutdown(sock,2);
+	closesocket(sock);
+}

@@ -267,6 +267,21 @@ int ICQPacket::CreateGoodByePacket(int nSequence)
 
 	return nPacketSize;
 }
+//! CreateSendCookiesPacket
+//! \param nSequence [in] a Sequence
+//! \param pCookies [in] a pointer to a buffer that contains cookies data
+//! \param nCookiesSize [in] a size of cookies data
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
+int ICQPacket::CreateSendCookiesPacket(int nSequence,char *pCookies,int nCookiesSize)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SIGNON,nSequence);
+
+	Add_u32_BE(0x00000001); // Version
+	Add_TLV_blob(ICQ_TLV_AUTH_COOKIE,pCookies,nCookiesSize);
+
+	return nPacketSize;
+}
 
 bool ICQPacket::IsTLVPresent(unsigned short Type)
 {
