@@ -273,7 +273,7 @@ int ICQPacket::CreateGoodByePacket(int nSequence)
 //! \param nCookiesSize [in] a size of cookies data
 //! \return a size of ICQ Packet
 //! \sa FLAP, TLV
-int ICQPacket::CreateSendCookiesPacket(int nSequence,char *pCookies,int nCookiesSize)
+int ICQPacket::CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SIGNON,nSequence);
 

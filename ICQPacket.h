@@ -35,6 +35,9 @@ private:
 	char *GetTLVPointer(unsigned short Type);
 	unsigned short GetTLVTypeFromOffset(char *pOffset);
 	unsigned short GetTLVLehgthFromOffset(char *pOffset);
+protected:
+	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
+	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);
@@ -45,8 +48,6 @@ public:
 	bool IsHelloPacket();
 	int CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
 	int CreateGoodByePacket(int nSequence);
-	int CreateSendCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
-	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
-	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
-	
+	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
+
 };

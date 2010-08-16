@@ -1,10 +1,12 @@
 //! \file SICQ.h 
 
 #pragma once
+#include <shlwapi.h>
+#pragma comment(lib,"shlwapi.lib")
+
 #include "Utils.h"
 #include "Net.h"
 #include "ICQPacket.h"
-
 #include "SICQ_define.h"
 
 //! A class for OSCAR protocol (ICQ/AIM)
@@ -33,7 +35,7 @@ WSACleanup();
 \sa _LoadWS, _UnloadWS
 */
 
-class SICQ
+class SICQ: private ICQPacket
 {
 private:
 	int nError;
