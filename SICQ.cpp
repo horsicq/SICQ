@@ -9,6 +9,7 @@ SICQ::SICQ(HWND hMainWnd)
 	nError=SICQ_ERROR_SUCCESS;
 	hEventWnd=0;
 	nSequence=1;
+	_ZeroMemory(&FoodGroups,sizeof(FoodGroups));
 
 	Start();
 }

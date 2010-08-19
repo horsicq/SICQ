@@ -47,6 +47,8 @@ private:
 	SOCKET sock;
 	int nSequence;
 
+	FOODGROUPS FoodGroups;
+
 	HWND hMainWnd;
 
 	void SequenceIncrement();
