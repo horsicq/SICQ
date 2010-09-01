@@ -168,7 +168,7 @@ int ICQPacket::Add_string(TCHAR *pszString)
 
 	return nStringLength;
 }
-int ICQPacket::Add_TLVheader(unsigned short Type,unsigned short Length)
+int ICQPacket::Add_TLVHeader(unsigned short Type,unsigned short Length)
 {
 	Add_u16_BE(Type);
 	Add_u16_BE(Length);
@@ -177,21 +177,21 @@ int ICQPacket::Add_TLVheader(unsigned short Type,unsigned short Length)
 }
 int ICQPacket::Add_TLV_u16(unsigned short Type,unsigned short sU16)
 {
-	Add_TLVheader(Type,2);
+	Add_TLVHeader(Type,2);
 	Add_u16_BE(sU16);
 
 	return 2+sizeof(TLV);
 }
 int ICQPacket::Add_TLV_u32(unsigned short Type,unsigned int nU32)
 {
-	Add_TLVheader(Type,4);
+	Add_TLVHeader(Type,4);
 	Add_u32_BE(nU32);
 
 	return 4+sizeof(TLV);
 }
 int ICQPacket::Add_TLV_blob(unsigned short Type,char *bData,int nDataSize)
 {
-	Add_TLVheader(Type,nDataSize);
+	Add_TLVHeader(Type,nDataSize);
 	Add_blob(bData,nDataSize);
 
 	return nDataSize+sizeof(TLV);
@@ -200,14 +200,14 @@ int ICQPacket::Add_TLV_string(unsigned short Type,TCHAR *pszString)
 {
 	int nStringLength=lstrlen(pszString);
 
-	Add_TLVheader(Type,nStringLength);
+	Add_TLVHeader(Type,nStringLength);
 	Add_string(pszString);
 
 	return nStringLength+sizeof(TLV);
 }
 int ICQPacket::Add_TLV_empty(unsigned short Type)
 {
-	Add_TLVheader(Type,0);
+	Add_TLVHeader(Type,0);
 
 	return 0;
 }
@@ -225,7 +225,7 @@ int ICQPacket::Add_TLV_password(unsigned short Type,TCHAR *pszPassword)
 		pChars[i]^=MagicXor[i];
 	}
 
-	Add_TLVheader(Type,nPasswordLength);
+	Add_TLVHeader(Type,nPasswordLength);
 	Add_blob(pChars,nPasswordLength);
 
 	_Free(pChars);
@@ -536,7 +536,22 @@ bool ICQPacket::GetFoodGroups(FOODGROUPS *fgs)
 	}
 }
 
+void ICQPacket::SetFoodGroupsVersions(FOODGROUPS *fgs)
+{
+
+}
+
 unsigned int ICQPacket::Get_u32_BE_FromOffset(char *pOffset)
 {
 	return ntohl(*((unsigned int *)pOffset));
+}
+
+int ICQPacket::Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid)
+{
+	Add_u16_BE(family);
+	Add_u16_BE(subtype);
+	Add_u16_BE(flags);
+	Add_u32_BE(requestid);
+
+	return sizeof(SNAC);
 }

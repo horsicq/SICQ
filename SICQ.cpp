@@ -169,6 +169,8 @@ void SICQ::ICQLogin()
 					if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
 					{
 						GetFoodGroups(&FoodGroups);
+
+						SetFoodGroupsVersions(&FoodGroups);
 					}
 				}
 			}

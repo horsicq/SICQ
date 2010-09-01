@@ -24,7 +24,7 @@ private:
 	int Add_u32_BE(unsigned int nU32);
 	int Add_blob(char *bData,int nDataSize);
 	int Add_string(TCHAR *pszString);
-	int Add_TLVheader(unsigned short Type,unsigned short Length);
+	int Add_TLVHeader(unsigned short Type,unsigned short Length);
 	int Add_TLV_u16(unsigned short Type,unsigned short sU16);
 	int Add_TLV_u32(unsigned short Type,unsigned int nU32);
 	int Add_TLV_blob(unsigned short Type,char *bData,int nDataSize);
@@ -45,6 +45,8 @@ private:
 	int GetSNACDataSize();
 
 	unsigned int Get_u32_BE_FromOffset(char *pOffset);
+
+	int Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid);
 protected:
 	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
 	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
@@ -52,6 +54,7 @@ protected:
 	bool IsSNACPresent(unsigned short family,unsigned short subtype);
 
 	bool GetFoodGroups(FOODGROUPS *fgs);
+	void SetFoodGroupsVersions(FOODGROUPS *fgs);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);
