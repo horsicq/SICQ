@@ -14,27 +14,3 @@
 //! \param lParam a pointer to SICQ class
 #define WM_SICQ_MAINWND_LOGIN				WM_USER+200
 
-struct FOODGROUP
-{
-	bool Support;
-	unsigned short Version;
-};
-
-struct FOODGROUPS
-{
-	FOODGROUP Oservice;
-	FOODGROUP Locate;
-	FOODGROUP Buddy;
-	FOODGROUP ICBM;
-	FOODGROUP Invite;
-	FOODGROUP Popup;
-	FOODGROUP PD;
-	FOODGROUP Lookup;
-	FOODGROUP Stats;
-	FOODGROUP Trans;
-	FOODGROUP SSI;
-	FOODGROUP Spec;
-	FOODGROUP Unk1;
-	FOODGROUP Unk2;
-	FOODGROUP Unk3;
-};

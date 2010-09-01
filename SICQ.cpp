@@ -165,6 +165,8 @@ void SICQ::ICQLogin()
 					SequenceIncrement();
 
 					Recv(sock);
+
+
 				}
 			}
 		}

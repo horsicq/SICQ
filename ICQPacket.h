@@ -35,6 +35,9 @@ private:
 	char *GetTLVPointer(unsigned short Type);
 	unsigned short GetTLVTypeFromOffset(char *pOffset);
 	unsigned short GetTLVLehgthFromOffset(char *pOffset);
+	void GetFoodGroups(FOODGROUPS *fgs);
+	bool IsSNACPresent(unsigned short family,unsigned short subtype);
+	char *GetSNACPointer();
 protected:
 	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
 	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);

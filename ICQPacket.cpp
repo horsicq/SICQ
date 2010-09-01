@@ -371,3 +371,18 @@ int ICQPacket::GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLen
 	}
 	return 0;
 }
+void ICQPacket::GetFoodGroups(FOODGROUPS *fgs)
+{
+
+}
+char *ICQPacket::GetSNACPointer()
+{
+	if(GetPacketSize()>=sizeof(FLAP)+sizeof(SNAC))
+	{
+		return GetPacketPointer()+sizeof(FLAP);
+	}
+	else
+	{
+		return 0;
+	}
+}
