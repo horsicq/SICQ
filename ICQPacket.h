@@ -35,12 +35,23 @@ private:
 	char *GetTLVPointer(unsigned short Type);
 	unsigned short GetTLVTypeFromOffset(char *pOffset);
 	unsigned short GetTLVLehgthFromOffset(char *pOffset);
-	void GetFoodGroups(FOODGROUPS *fgs);
-	bool IsSNACPresent(unsigned short family,unsigned short subtype);
+
 	char *GetSNACPointer();
+	unsigned short GetSNACFamily();
+	unsigned short GetSNACSubtype();
+	unsigned short GetSNACFlags();
+	unsigned int GetSNACRequestid();
+	char *GetSNACDataPointer();
+	int GetSNACDataSize();
+
+	unsigned int Get_u32_BE_FromOffset(char *pOffset);
 protected:
 	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
 	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
+	bool IsHelloPacket();
+	bool IsSNACPresent(unsigned short family,unsigned short subtype);
+
+	bool GetFoodGroups(FOODGROUPS *fgs);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);
@@ -48,9 +59,7 @@ public:
 	int GetPacketSize();
 	int Recv(SOCKET sock);
 	int Send(SOCKET sock);
-	bool IsHelloPacket();
 	int CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
 	int CreateGoodByePacket(int nSequence);
 	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
-
 };
