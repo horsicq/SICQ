@@ -157,20 +157,23 @@ void SICQ::ICQLogin()
 			sock=_socket();
 			if(_connect(sock,szBOSServer,nBOSServerPort))
 			{
-				Recv(sock);
-				if(IsHelloPacket())
+				while(true)
 				{
-					CreateCookiesPacket(nSequence,Cookies,nCookiesSize);
-					Send(sock);
-					SequenceIncrement();
-
 					Recv(sock);
+					if(IsHelloPacket())
+					{
+						CreateCookiesPacket(nSequence,Cookies,nCookiesSize);
 
-					if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
+						Send(sock);
+						SequenceIncrement();
+					}
+					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
 					{
 						GetFoodGroups(&FoodGroups);
+						SetFoodGroupsVersions(nSequence,&FoodGroups);
 
-						SetFoodGroupsVersions(&FoodGroups);
+						Send(sock);
+						SequenceIncrement();
 					}
 				}
 			}
