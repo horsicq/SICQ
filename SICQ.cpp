@@ -1,11 +1,7 @@
 #include "StdAfx.h"
 #include "SICQ.h"
 
-#ifdef  _DEBUG
-//##################################################
-#include "Console.h"
-//##################################################
-#endif
+
 
 //! Constructor
 //! \param [in] hMainWnd Das ist ein Handle des Fensters, das alle Events bekommen muss
@@ -199,13 +195,21 @@ void SICQ::ICQLogin()
 						GetFoodGroups(&FoodGroups);
 #ifdef  _DEBUG
 						//##################################################
-						_PrintTextNS(TEXT("Create Cookies Packet"));
+						_PrintTextNS(TEXT("Set Foods Group Versions"));
 						//##################################################
 #endif
 						SetFoodGroupsVersions(nSequence,&FoodGroups);
 
 						Send(sock);
 						SequenceIncrement();
+					}
+					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_SERVICESVERSIONS))
+					{
+
+						GetServicesVersions(&FoodGroups);
+
+						//Send(sock);
+						//SequenceIncrement();
 					}
 				}
 			}

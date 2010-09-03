@@ -50,3 +50,23 @@ void _Free(void *pMemory)
 {
 	GlobalFree(pMemory);
 }
+//! Maximal of two ints
+//! \param n1 [in] a first int
+//! \param n2 [in] a second int
+int _MaxInt(int n1,int n2)
+{
+	if(n1>n2)
+		return n1;
+	else
+		return n2;
+}
+//! Minimal of two ints
+//! \param n1 [in] a first int
+//! \param n2 [in] a second int
+int _MinInt(int n1,int n2)
+{
+	if(n1<n2)
+		return n1;
+	else
+		return n2;
+}

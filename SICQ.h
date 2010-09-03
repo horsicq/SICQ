@@ -9,6 +9,7 @@
 #include "ICQPacket.h"
 #include "SICQ_define.h"
 
+
 //! A class for OSCAR protocol (ICQ/AIM)
 /*!
 An application or DLL is required to perform a successful WSAStartup call before it can use SICQ

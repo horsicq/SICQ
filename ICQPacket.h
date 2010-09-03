@@ -5,6 +5,8 @@
 #include "Strings.h"
 #include "Net.h"
 
+
+
 class ICQPacket
 {
 private:
@@ -45,6 +47,7 @@ private:
 	int GetSNACDataSize();
 
 	unsigned int Get_u32_BE_FromOffset(char *pOffset);
+	unsigned short Get_u16_BE_FromOffset(char *pOffset);
 
 	int Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid);
 protected:
@@ -55,6 +58,7 @@ protected:
 
 	bool GetFoodGroups(FOODGROUPS *fgs);
 	int SetFoodGroupsVersions(int nSequence,FOODGROUPS *fgs);
+	bool GetServicesVersions(FOODGROUPS *fgs);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

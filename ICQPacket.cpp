@@ -39,6 +39,12 @@ int ICQPacket::Recv(SOCKET sock)
 			if(_recv(sock,pPacket+sizeof(FLAP),nPacketSize))
 			{
 				nPacketSize+=sizeof(FLAP);
+
+#ifdef  _DEBUG
+				//##################################################
+				_PrintHEXTable(pPacket,nPacketSize);
+				//##################################################
+#endif
 			}
 			else
 			{
@@ -56,6 +62,11 @@ int ICQPacket::Send(SOCKET sock)
 {
 	if(IsFLAPPacket())
 	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintHEXTable(pPacket,nPacketSize);
+		//##################################################
+#endif
 		return _send(sock,pPacket,nPacketSize);
 	}
 	else
@@ -471,11 +482,11 @@ bool ICQPacket::GetFoodGroups(FOODGROUPS *fgs)
 	int nSize=GetSNACDataSize();
 	char *pOffset=GetSNACDataPointer();
 
-	if(nSize)
+	if(nSize&&IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
 	{
 		while(nSize>0)
 		{
-			switch(Get_u32_BE_FromOffset(pOffset))
+			switch(Get_u16_BE_FromOffset(pOffset))
 			{
 			case ICQ_SNAC_FOODGROUP_OSERVICE:
 				fgs->Oservice.Support=true;
@@ -524,8 +535,8 @@ bool ICQPacket::GetFoodGroups(FOODGROUPS *fgs)
 				break;
 			}
 
-			pOffset+=4;
-			nSize-=4;
+			pOffset+=2;
+			nSize-=2;
 		}
 
 		return true;
@@ -581,6 +592,10 @@ unsigned int ICQPacket::Get_u32_BE_FromOffset(char *pOffset)
 {
 	return ntohl(*((unsigned int *)pOffset));
 }
+unsigned short ICQPacket::Get_u16_BE_FromOffset(char *pOffset)
+{
+	return ntohs(*((unsigned short *)pOffset));
+}
 
 int ICQPacket::Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid)
 {
@@ -590,4 +605,74 @@ int ICQPacket::Add_SNACHeader(unsigned short family,unsigned short subtype,unsig
 	Add_u32_BE(requestid);
 
 	return sizeof(SNAC);
+}
+
+bool ICQPacket::GetServicesVersions(FOODGROUPS *fgs)
+{
+	int nSize=GetSNACDataSize();
+	char *pOffset=GetSNACDataPointer();
+
+	if(nSize&&IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_SERVICESVERSIONS))
+	{
+		while(nSize>0)
+		{
+			switch(Get_u16_BE_FromOffset(pOffset))
+			{
+			case ICQ_SNAC_FOODGROUP_OSERVICE:
+				fgs->Oservice.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_LOCATE:
+				fgs->Locate.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_BUDDY:
+				fgs->Buddy.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_ICBM:
+				fgs->ICBM.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_INVITE:
+				fgs->Invite.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_POPUP:
+				fgs->Popup.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_PD:
+				fgs->PD.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_LOOKUP:
+				fgs->Lookup.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_STATS:
+				fgs->Stats.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_TRANS:
+				fgs->Trans.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_SSI:
+				fgs->SSI.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_SPEC:
+				fgs->Spec.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_UNK1:
+				fgs->Unk1.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_UNK2:
+				fgs->Unk2.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			case ICQ_SNAC_FOODGROUP_UNK3:
+				fgs->Unk3.Version=Get_u16_BE_FromOffset(pOffset+2);
+				break;
+			}
+
+			pOffset+=4;
+			nSize-=4;
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

@@ -1,13 +1,6 @@
 #include "stdafx.h"
 #include "Net.h"
 
-#ifdef  _DEBUG
-//##################################################
-#include "Console.h"
-//##################################################
-#endif
-
-
 //! Load WinSocket
 //! \return true  if success
 //! \return false if fail
@@ -87,7 +80,6 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 #ifdef  _DEBUG
 	//##################################################
 	_PrintTextNS(TEXT("Recv..."));
-	_PrintHEXNS(pBuffer,nBufferSize);
 	//##################################################
 #endif
 
@@ -108,7 +100,6 @@ int _send(SOCKET sock,char *pBuffer,int nBufferSize)
 #ifdef  _DEBUG
 	//##################################################
 	_PrintTextNS(TEXT("Send..."));
-	_PrintHEXNS(pBuffer,nBufferSize);
 	//##################################################
 #endif
 

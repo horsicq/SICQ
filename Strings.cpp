@@ -31,7 +31,12 @@ int _CharsToString(TCHAR *pszString,int nStringLength,char *pszChars)
 	return lstrlen(pszString);
 #endif
 }
-
+//! Convert binary data to HEX.
+//! \param pData [in] a pointer to binary data.
+//! \param nDataSize [in] a size, in bytes, of binary data.
+//! \param pszHEX [out] a pointer to a buffer that receives the HEX string.
+//! \return the number of characters written to the buffer pointed to by pszHEX if successful.
+//! \return The function returns 0 if it does not succeed. 
 int _BinToHEX(char *pData,int nDataSize,TCHAR *pszHEX)
 {
 	TCHAR szBuffer[16];
@@ -43,5 +48,26 @@ int _BinToHEX(char *pData,int nDataSize,TCHAR *pszHEX)
 		lstrcat(pszHEX,szBuffer);
 	}
 	
+	return lstrlen(pszHEX);
+}
+//! Convert binary data to HEX Table[8].
+//! \param pData [in] a pointer to binary data.
+//! \param nDataSize [in] a size, in bytes, of binary data.
+//! \param pszHEX [out] a pointer to a buffer that receives the HEX string.
+//! \return the number of characters written to the buffer pointed to by pszHEX if successful.
+//! \return The function returns 0 if it does not succeed. 
+int _BinToHEXTable(char *pData,int nDataSize,TCHAR *pszHEX)
+{
+	TCHAR szBuffer[256];
+	*pszHEX=0;
+	for(int i=0;i<nDataSize;i+=8)
+	{
+		wsprintf(szBuffer,TEXT("%04X|"),i);
+		lstrcat(pszHEX,szBuffer);
+		_BinToHEX(pData+i,_MinInt(8,nDataSize-i),szBuffer);
+		lstrcat(pszHEX,szBuffer);
+		lstrcat(pszHEX,_TEXT("\n"));
+	}
+
 	return lstrlen(pszHEX);
 }
