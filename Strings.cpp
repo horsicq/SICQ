@@ -31,3 +31,17 @@ int _CharsToString(TCHAR *pszString,int nStringLength,char *pszChars)
 	return lstrlen(pszString);
 #endif
 }
+
+int _BinToHEX(char *pData,int nDataSize,TCHAR *pszHEX)
+{
+	TCHAR szBuffer[16];
+	*pszHEX=0;
+
+	for(int i=0;i<nDataSize;i++)
+	{
+		wsprintf(szBuffer,TEXT("%02X"),*((unsigned char *)(pData+i)));
+		lstrcat(pszHEX,szBuffer);
+	}
+	
+	return lstrlen(pszHEX);
+}

@@ -1,6 +1,12 @@
 #include "StdAfx.h"
 #include "SICQ.h"
 
+#ifdef  _DEBUG
+//##################################################
+#include "Console.h"
+//##################################################
+#endif
+
 //! Constructor
 //! \param [in] hMainWnd Das ist ein Handle des Fensters, das alle Events bekommen muss
 SICQ::SICQ(HWND hMainWnd)
@@ -135,9 +141,20 @@ void SICQ::ICQLogin()
 		Recv(sock);
 		if(IsHelloPacket())
 		{
+#ifdef  _DEBUG
+			//##################################################
+			_PrintTextNS(TEXT("Create Login Packet"));
+			//##################################################
+#endif
 			CreateLoginPacket(nSequence,szUIN,szPassword);
 			Send(sock);
 			SequenceIncrement();
+
+#ifdef  _DEBUG
+			//##################################################
+			_PrintTextNS(TEXT("Recv Cookies"));
+			//##################################################
+#endif
 
 			Recv(sock);
 			nCookiesSize=GetTLV_blob(ICQ_TLV_AUTH_COOKIE,Cookies,sizeof(Cookies));
@@ -147,6 +164,11 @@ void SICQ::ICQLogin()
 			lstrcpyn(szBOSServer,szBuffer,(pszOffset-szBuffer));
 			nBOSServerPort=StrToInt(pszOffset);
 
+#ifdef  _DEBUG
+			//##################################################
+			_PrintTextNS(TEXT("Create Goodbye Packet"));
+			//##################################################
+#endif
 			CreateGoodByePacket(nSequence);
 			Send(sock);
 			SequenceIncrement();
@@ -162,6 +184,11 @@ void SICQ::ICQLogin()
 					Recv(sock);
 					if(IsHelloPacket())
 					{
+#ifdef  _DEBUG
+						//##################################################
+						_PrintTextNS(TEXT("Create Cookies Packet"));
+						//##################################################
+#endif
 						CreateCookiesPacket(nSequence,Cookies,nCookiesSize);
 
 						Send(sock);
@@ -170,6 +197,11 @@ void SICQ::ICQLogin()
 					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
 					{
 						GetFoodGroups(&FoodGroups);
+#ifdef  _DEBUG
+						//##################################################
+						_PrintTextNS(TEXT("Create Cookies Packet"));
+						//##################################################
+#endif
 						SetFoodGroupsVersions(nSequence,&FoodGroups);
 
 						Send(sock);

@@ -54,7 +54,7 @@ protected:
 	bool IsSNACPresent(unsigned short family,unsigned short subtype);
 
 	bool GetFoodGroups(FOODGROUPS *fgs);
-	void SetFoodGroupsVersions(FOODGROUPS *fgs);
+	int SetFoodGroupsVersions(int nSequence,FOODGROUPS *fgs);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

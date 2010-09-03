@@ -1,6 +1,12 @@
 #include "stdafx.h"
 #include "Net.h"
 
+#ifdef  _DEBUG
+//##################################################
+#include "Console.h"
+//##################################################
+#endif
+
 
 //! Load WinSocket
 //! \return true  if success
@@ -12,17 +18,33 @@ bool _LoadWS()
 
 	wVersionRequested = MAKEWORD(2, 2);
 
+#ifdef  _DEBUG
+//##################################################
+	_PrintTextNS(TEXT("Load Win Socket"));
+//##################################################
+#endif
+
 	return WSAStartup(wVersionRequested, &wsaData)==0;
 }
 //! Unload WinSocket
 void _UnloadWS()
 {
+#ifdef  _DEBUG
+//##################################################
+	_PrintTextNS(TEXT("Unload Win Socket"));
+//##################################################
+#endif
 	WSACleanup();
 }
 //! The _socket function creates a socket
 //! \return If no error occurs, socket returns a descriptor referencing the new socket.
 SOCKET _socket()
 {
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Socket"));
+	//##################################################
+#endif
 	return socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 }
 //! The _connect function establishes a connection
@@ -42,6 +64,12 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 	sa.sin_port = htons(nServerPort);
 	sa.sin_addr.s_addr = inet_addr(szBuffer);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Connect"));
+	//##################################################
+#endif
+
 	return (connect(sock,(const sockaddr *)&sa,sizeof(sa))!= SOCKET_ERROR);
 	
 }
@@ -54,7 +82,17 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 //! the return value is zero.
 int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 {
-	return recv(sock,pBuffer,nBufferSize,0);
+	int nSize=recv(sock,pBuffer,nBufferSize,0);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Recv..."));
+	_PrintHEXNS(pBuffer,nBufferSize);
+	//##################################################
+#endif
+
+	return nSize;
+
 }
 
 //! The _send function sends data on a connected socket 
@@ -65,12 +103,27 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 //! than the number requested to be sent in the nBufferSize parameter
 int _send(SOCKET sock,char *pBuffer,int nBufferSize)
 {
-	return send(sock,pBuffer,nBufferSize,0);
+	int nSize=send(sock,pBuffer,nBufferSize,0);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Send..."));
+	_PrintHEXNS(pBuffer,nBufferSize);
+	//##################################################
+#endif
+
+	return nSize;
 }
 //! Close connection
 //! \param sock [in] a descriptor identifying a connected socket
 void _closeconnect(SOCKET sock)
 {
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Close Socket"));
+	//##################################################
+#endif
+
 	shutdown(sock,2);
 	closesocket(sock);
 }
