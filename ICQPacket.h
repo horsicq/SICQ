@@ -56,9 +56,10 @@ protected:
 	bool IsHelloPacket();
 	bool IsSNACPresent(unsigned short family,unsigned short subtype);
 
-	bool GetFoodGroups(FOODGROUPS *fgs);
-	int SetFoodGroupsVersions(int nSequence,FOODGROUPS *fgs);
-	bool GetServicesVersions(FOODGROUPS *fgs);
+	bool ReadFoodGroupsFamiliesPacket(FOODGROUPS *fgs);
+	int CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *fgs);
+	bool ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs);
+	int CreateRequestRatesPacket(int nSequence);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

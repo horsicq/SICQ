@@ -79,7 +79,9 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("Recv..."));
+	TCHAR szBuffer[256];
+	wsprintf(szBuffer,TEXT("Recv %d(%X) bytes"),nSize,nSize);
+	_PrintTextNS(szBuffer);
 	//##################################################
 #endif
 
@@ -99,7 +101,9 @@ int _send(SOCKET sock,char *pBuffer,int nBufferSize)
 
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("Send..."));
+	TCHAR szBuffer[256];
+	wsprintf(szBuffer,TEXT("Send %d(%X) bytes"),nSize,nSize);
+	_PrintTextNS(szBuffer);
 	//##################################################
 #endif
 
