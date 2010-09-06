@@ -36,6 +36,15 @@ int ICQPacket::Recv(SOCKET sock)
 		if(IsFLAPPacket())
 		{
 			nPacketSize=GetFLAPDataSize();
+
+#ifdef  _DEBUG
+			//##################################################
+			TCHAR szBuffer[256];
+			wsprintf(szBuffer,TEXT("Packet Size %d(%X) bytes"),nPacketSize,nPacketSize);
+			_PrintTextNS(szBuffer);
+			//##################################################
+#endif
+
 			if(_recv(sock,pPacket+sizeof(FLAP),nPacketSize))
 			{
 				nPacketSize+=sizeof(FLAP);

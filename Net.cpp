@@ -75,7 +75,13 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 //! the return value is zero.
 int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 {
-	int nSize=recv(sock,pBuffer,nBufferSize,0);
+
+	int nSize=0;
+
+	for(int i=0,j=nBufferSize;j>0;i+=1000,j-=1000)
+	{
+		nSize+=recv(sock,&pBuffer[i],_MinInt(j,1000),0);
+	}
 
 #ifdef  _DEBUG
 	//##################################################
@@ -97,7 +103,12 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 //! than the number requested to be sent in the nBufferSize parameter
 int _send(SOCKET sock,char *pBuffer,int nBufferSize)
 {
-	int nSize=send(sock,pBuffer,nBufferSize,0);
+	int nSize=0;
+
+	for(int i=0,j=nBufferSize;j>0;i+=1000,j-=1000)
+	{
+		nSize+=send(sock,&pBuffer[i],_MinInt(j,1000),0);
+	}
 
 #ifdef  _DEBUG
 	//##################################################
