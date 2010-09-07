@@ -60,6 +60,7 @@ protected:
 	int CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *fgs);
 	bool ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs);
 	int CreateRequestRatesPacket(int nSequence);
+	int CreateAcceptRatesPacket(int nSequence);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

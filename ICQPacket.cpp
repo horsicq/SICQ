@@ -715,3 +715,16 @@ int ICQPacket::CreateRequestRatesPacket(int nSequence)
 
 	return nPacketSize;
 }
+int ICQPacket::CreateAcceptRatesPacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ACCEPTRATELIMITS,0,nSequence);
+
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0002);
+	Add_u16_BE(0x0003);
+	Add_u16_BE(0x0004);
+	Add_u16_BE(0x0005);
+
+	return nPacketSize;
+}

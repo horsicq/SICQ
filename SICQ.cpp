@@ -283,6 +283,24 @@ void SICQ::ICQLogin()
 						_PrintTextNS(TEXT("Rate Limits"));
 						//##################################################
 #endif
+						CreateAcceptRatesPacket(nSequence);
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Accept Rate Limits"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
+					}
+					else
+					{
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Unknown"));
+						//##################################################
+#endif
 					}
 				}
 			}
