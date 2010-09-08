@@ -61,6 +61,8 @@ protected:
 	bool ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs);
 	int CreateRequestRatesPacket(int nSequence);
 	int CreateAcceptRatesPacket(int nSequence);
+	int CreateRequestRosterFirstTimePacket(int nSequence);
+	int CreateLoadRosterAfterLoginPacket(int nSequence);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

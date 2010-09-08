@@ -292,12 +292,55 @@ void SICQ::ICQLogin()
 #endif
 						Send(sock);
 						SequenceIncrement();
+
+						CreateRequestRosterFirstTimePacket(nSequence);
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Request Roster (First Time)"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
+					}
+					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_ROSTER))
+					{
+#ifdef  _DEBUG
+						//##################################################
+						_PrintTextNS(TEXT("Roster"));
+						//##################################################
+#endif
+						CreateLoadRosterAfterLoginPacket(nSequence);
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Load Roster (After Login)"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
+					}
+					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ONLINEINFO))
+					{
+#ifdef  _DEBUG
+						//##################################################
+						_PrintTextNS(TEXT("Request Online Info"));
+						//##################################################
+#endif
+					}
+					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_EXTENDEDSTATUS))
+					{
+#ifdef  _DEBUG
+						//##################################################
+						_PrintTextNS(TEXT("Extended Status"));
+						//##################################################
+#endif
 					}
 					else
 					{
 #ifdef  _DEBUG
 						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						//_PrintHEXTable(GetPacketPointer(),GetPacketSize());
 						_PrintTextNS(TEXT("Unknown"));
 						//##################################################
 #endif

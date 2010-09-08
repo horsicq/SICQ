@@ -728,3 +728,17 @@ int ICQPacket::CreateAcceptRatesPacket(int nSequence)
 
 	return nPacketSize;
 }
+int ICQPacket::CreateRequestRosterFirstTimePacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_REQUESTROSTERFIRSTTIME,0,nSequence);
+
+	return nPacketSize;
+}
+int ICQPacket::CreateLoadRosterAfterLoginPacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_LOADROSTERAFTERLOGIN,0,nSequence);
+
+	return nPacketSize;
+}
