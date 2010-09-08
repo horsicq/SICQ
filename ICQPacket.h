@@ -66,6 +66,7 @@ protected:
 	int CreateSetICBMParametersPacket(int nSequence);
 	int CreateRequestBuddyParametersPacket(int nSequence);
 	int CreateSetStatusPacket(int nSequence,int nStatus);
+	int CreateClientReadyPacket(int nSequence);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

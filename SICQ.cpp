@@ -124,7 +124,7 @@ void SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPass
 	SendMessage(hEventWnd,WM_SICQ_EVENTWND_LOGIN,0,(LPARAM)this);
 }
 //! Login
-void SICQ::ICQLogin()
+bool SICQ::ICQLogin()
 {
 	TCHAR szBuffer[256],szBOSServer[64],*pszOffset;
 	char Cookies[256];
@@ -375,6 +375,19 @@ void SICQ::ICQLogin()
 #endif
 						Send(sock);
 						SequenceIncrement();
+
+						CreateClientReadyPacket(nSequence);
+
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Client Ready"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
+
+						return TRUE;
 					}
 					else
 					{
@@ -418,7 +431,13 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 	case WM_SICQ_EVENTWND_LOGIN:
 
-		((SICQ *)lParam)->ICQLogin();
+		if(((SICQ *)lParam)->ICQLogin())
+		{
+			while(TRUE)
+			{
+
+			}
+		}
 
 		break;
 

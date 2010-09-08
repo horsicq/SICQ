@@ -59,7 +59,7 @@ private:
 	// Stop
 	bool Stop();
 	// ICQ Login
-	void ICQLogin();
+	bool ICQLogin();
 
 	// CALLBACK function
 	static LRESULT CALLBACK SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

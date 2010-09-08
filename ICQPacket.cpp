@@ -776,3 +776,65 @@ int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
 
 	return nPacketSize;
 }
+int ICQPacket::CreateClientReadyPacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_CLIENTREADY,0,nSequence);
+
+	Add_u16_BE(0x0022);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0004);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0013);
+	Add_u16_BE(0x0004);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0002);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0003);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0015);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0004);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0006);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x0009);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x000A);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	Add_u16_BE(0x000B);
+	Add_u16_BE(0x0001);
+	Add_u16_BE(0x0110);
+	Add_u16_BE(0x164F);
+
+	return nPacketSize;
+}
