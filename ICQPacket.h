@@ -63,6 +63,9 @@ protected:
 	int CreateAcceptRatesPacket(int nSequence);
 	int CreateRequestRosterFirstTimePacket(int nSequence);
 	int CreateLoadRosterAfterLoginPacket(int nSequence);
+	int CreateSetICBMParametersPacket(int nSequence);
+	int CreateRequestBuddyParametersPacket(int nSequence);
+	int CreateSetStatusPacket(int nSequence,int nStatus);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

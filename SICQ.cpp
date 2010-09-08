@@ -319,6 +319,27 @@ void SICQ::ICQLogin()
 #endif
 						Send(sock);
 						SequenceIncrement();
+
+						CreateSetICBMParametersPacket(nSequence);
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Set ICMB Parameters"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
+
+						CreateRequestBuddyParametersPacket(nSequence);
+
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Request Buddy Parameters"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
 					}
 					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ONLINEINFO))
 					{
@@ -335,6 +356,25 @@ void SICQ::ICQLogin()
 						_PrintTextNS(TEXT("Extended Status"));
 						//##################################################
 #endif
+					}
+					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_PARAMETERS))
+					{
+#ifdef  _DEBUG
+						//##################################################
+						_PrintTextNS(TEXT("Buddy Parameters"));
+						//##################################################
+#endif
+
+						CreateSetStatusPacket(nSequence,ICQ_STATUS_ONLINE);
+
+#ifdef  _DEBUG
+						//##################################################
+						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+						_PrintTextNS(TEXT("Set Status"));
+						//##################################################
+#endif
+						Send(sock);
+						SequenceIncrement();
 					}
 					else
 					{

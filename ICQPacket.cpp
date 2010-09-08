@@ -742,3 +742,37 @@ int ICQPacket::CreateLoadRosterAfterLoginPacket(int nSequence)
 
 	return nPacketSize;
 }
+int ICQPacket::CreateSetICBMParametersPacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_SETPARAMETERS,0,nSequence);
+
+	Add_u16_BE(0x0002);
+	Add_u32_BE(0x00000003); // ICBM__PARAMETER_FLAGS
+	Add_u16_BE(0x1F40);
+	Add_u16_BE(0x03E7);
+	Add_u16_BE(0x03E7);
+	Add_u32_BE(0x00000000);
+
+	return nPacketSize;
+}
+int ICQPacket::CreateRequestBuddyParametersPacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_REQUESTPARAMETERS,0,nSequence);
+
+	Add_u16_BE(0x0005);
+	Add_u16_BE(0x0002);
+	Add_u16_BE(0x0003);
+
+	return nPacketSize;
+}
+int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
+{
+	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_SETSTATUS,0,nSequence);
+
+	Add_TLV_u32(ICQ_TLV_USERSTATUS,nStatus);
+
+	return nPacketSize;
+}

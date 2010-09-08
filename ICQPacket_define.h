@@ -44,6 +44,7 @@ struct SNAC
 //#define ICQ_TLV_				0x0004
 #define ICQ_TLV_BOS_SERVER					0x0005
 #define ICQ_TLV_AUTH_COOKIE					0x0006
+#define ICQ_TLV_USERSTATUS					0x0006
 //#define ICQ_TLV_				0x0007
 #define ICQ_TLV_AUTH_ERROR_CODE				0x0008
 //#define ICQ_TLV_				0x0009
@@ -97,11 +98,33 @@ struct SNAC
 #define ICQ_SNAC_OSERVICE_WELLKNOWNURLS		0x0015
 #define ICQ_SNAC_OSERVICE_REQUESTVERSIONS	0x0017
 #define ICQ_SNAC_OSERVICE_VERSIONS			0x0018
+#define ICQ_SNAC_OSERVICE_SETSTATUS			0x001E
 #define ICQ_SNAC_OSERVICE_EXTENDEDSTATUS	0x0021
+
+#define ICQ_SNAC_BUDDY_REQUESTPARAMETERS	0x0002
+#define ICQ_SNAC_BUDDY_PARAMETERS			0x0003
+
+#define ICQ_SNAC_ICBM_SETPARAMETERS			0x0002
 
 #define ICQ_SNAC_SSI_REQUESTROSTERFIRSTTIME	0x0004
 #define ICQ_SNAC_SSI_ROSTER					0x0006
 #define ICQ_SNAC_SSI_LOADROSTERAFTERLOGIN	0x0007
+
+#define ICQ_STATUS_WEBAWARE					0x00010000		// Status webaware flag
+#define ICQ_STATUS_SHOWIP					0x00020000		// Status show ip flag
+#define ICQ_STATUS_BIRTHDAY					0x00080000		// User birthday flag
+#define ICQ_STATUS_WEBFRONT					0x00200000		// User active webfront flag
+#define ICQ_STATUS_DCDISABLED				0x01000000		// Direct connection not supported
+#define ICQ_STATUS_DCAUTH					0x10000000		// Direct connection upon authorization
+#define ICQ_STATUS_DCCONT					0x20000000		// DC only with contact users
+
+#define ICQ_STATUS_ONLINE					0x00000000		// Status is online
+#define ICQ_STATUS_AWAY						0x00000001		// Status is away
+#define ICQ_STATUS_DND						0x00000002		// Status is no not disturb (DND)
+#define ICQ_STATUS_NA						0x00000004		// Status is not available (N/A)
+#define ICQ_STATUS_OCCUPIED					0x00000010		// Status is occupied (BISY)
+#define ICQ_STATUS_FREEFORCHAT				0x00000020		// Status is free for chat
+#define ICQ_STATUS_INVISIBLE				0x00000100		// Status is invisible
 
 struct FOODGROUP
 {
