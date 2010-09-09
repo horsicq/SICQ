@@ -124,7 +124,7 @@ void SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPass
 	SendMessage(hEventWnd,WM_SICQ_EVENTWND_LOGIN,0,(LPARAM)this);
 }
 //! Login
-bool SICQ::ICQLogin()
+void SICQ::ICQLogin()
 {
 	TCHAR szBuffer[256],szBOSServer[64],*pszOffset;
 	char Cookies[256];
@@ -160,249 +160,276 @@ bool SICQ::ICQLogin()
 #ifdef  _DEBUG
 			//##################################################
 			_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-			_PrintTextNS(TEXT("Recv Cookies"));
 			//##################################################
 #endif
-			nCookiesSize=GetTLV_blob(ICQ_TLV_AUTH_COOKIE,Cookies,sizeof(Cookies));
-			GetTLV_string(ICQ_TLV_BOS_SERVER,szBuffer,sizeof(szBuffer)/sizeof(TCHAR));
-			pszOffset=StrStr(szBuffer,_TEXT(":"));
-			pszOffset++;
-			lstrcpyn(szBOSServer,szBuffer,(pszOffset-szBuffer));
-			nBOSServerPort=StrToInt(pszOffset);
 
-			CreateGoodByePacket(nSequence);
-#ifdef  _DEBUG
-			//##################################################
-			_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-			_PrintTextNS(TEXT("Create Goodbye Packet"));
-			//##################################################
-#endif
-			Send(sock);
-			SequenceIncrement();
-
-			_closeconnect(sock);
-
-			// BOS Server Connection
-			sock=_socket();
-			if(_connect(sock,szBOSServer,nBOSServerPort))
+			if(!IsSignOffChannel())
 			{
-				while(true)
+#ifdef  _DEBUG
+				//##################################################
+				_PrintTextNS(TEXT("Recv Cookies"));
+				//##################################################
+#endif
+				nCookiesSize=GetTLV_blob(ICQ_TLV_AUTHCOOKIE,Cookies,sizeof(Cookies));
+				GetTLV_string(ICQ_TLV_BOSSERVER,szBuffer,sizeof(szBuffer)/sizeof(TCHAR));
+				pszOffset=StrStr(szBuffer,_TEXT(":"));
+				pszOffset++;
+				lstrcpyn(szBOSServer,szBuffer,(pszOffset-szBuffer));
+				nBOSServerPort=StrToInt(pszOffset);
+
+				CreateGoodByePacket(nSequence);
+#ifdef  _DEBUG
+				//##################################################
+				_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+				_PrintTextNS(TEXT("Create Goodbye Packet"));
+				//##################################################
+#endif
+				Send(sock);
+				SequenceIncrement();
+
+				_closeconnect(sock);
+
+				// BOS Server Connection
+				sock=_socket();
+				if(_connect(sock,szBOSServer,nBOSServerPort))
 				{
-					Recv(sock);
-
-#ifdef  _DEBUG
-					//##################################################
-					_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-					//##################################################
-#endif
-
-					if(IsHelloPacket())
+					while(true)
 					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Hello Packet"));
-						//##################################################
-#endif
-						CreateCookiesPacket(nSequence,Cookies,nCookiesSize);
+						Recv(sock);
 
 #ifdef  _DEBUG
 						//##################################################
 						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Create Cookies Packet"));
 						//##################################################
 #endif
 
-						Send(sock);
-						SequenceIncrement();
+						if(IsHelloPacket())
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Hello Packet"));
+							//##################################################
+#endif
+							CreateCookiesPacket(nSequence,Cookies,nCookiesSize);
+
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Create Cookies Packet"));
+							//##################################################
+#endif
+
+							Send(sock);
+							SequenceIncrement();
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Services Families"));
+							_PrintTextNS(TEXT("Get Food Groups"));
+							//##################################################
+#endif
+							ReadFoodGroupsFamiliesPacket(&FoodGroups);
+							CreateFoodGroupsVersionsPacket(nSequence,&FoodGroups);
+
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Set Foods Group Versions"));
+							//##################################################
+#endif
+
+							Send(sock);
+							SequenceIncrement();
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_VERSIONS))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Services Versions"));
+							_PrintTextNS(TEXT("Get Services Versions"));
+							//##################################################
+#endif
+
+							ReadFoodGroupsVersionsPacket(&FoodGroups);
+
+							//Send(sock);
+							//SequenceIncrement();
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_MESSAGEOFTHEDAY))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Message of the Day"));
+							//##################################################
+#endif
+							CreateRequestRatesPacket(nSequence);
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Create Request Rates"));
+							//##################################################
+#endif
+
+							Send(sock);
+							SequenceIncrement();
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_WELLKNOWNURLS))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Well known URLs"));
+							//##################################################
+#endif
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_RATELIMITS))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Rate Limits"));
+							//##################################################
+#endif
+							CreateAcceptRatesPacket(nSequence);
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Accept Rate Limits"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+
+							CreateRequestRosterFirstTimePacket(nSequence);
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Request Roster (First Time)"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_ROSTER))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Roster"));
+							//##################################################
+#endif
+							CreateLoadRosterAfterLoginPacket(nSequence);
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Load Roster (After Login)"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+
+							CreateSetICBMParametersPacket(nSequence);
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Set ICMB Parameters"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+
+							CreateRequestBuddyParametersPacket(nSequence);
+
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Request Buddy Parameters"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ONLINEINFO))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Request Online Info"));
+							//##################################################
+#endif
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_EXTENDEDSTATUS))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Extended Status"));
+							//##################################################
+#endif
+						}
+						else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_PARAMETERS))
+						{
+#ifdef  _DEBUG
+							//##################################################
+							_PrintTextNS(TEXT("Buddy Parameters"));
+							//##################################################
+#endif
+
+							CreateSetStatusPacket(nSequence,ICQ_STATUS_ONLINE);
+
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Set Status"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+
+							CreateClientReadyPacket(nSequence);
+
+#ifdef  _DEBUG
+							//##################################################
+							_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Client Ready"));
+							//##################################################
+#endif
+							Send(sock);
+							SequenceIncrement();
+
+							nError=SICQ_ERROR_SUCCESS;
+
+							break;
+						}
+						else
+						{
+#ifdef  _DEBUG
+							//##################################################
+							//_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+							_PrintTextNS(TEXT("Unknown"));
+							//##################################################
+#endif
+						}
 					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_FAMILIES))
-					{
+				}
+				else
+				{
+					nError=SICQ_ERROR_CANNOTCONNECTTOSERVER;
+				}
+			}
+			else
+			{
 #ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Services Families"));
-						_PrintTextNS(TEXT("Get Food Groups"));
-						//##################################################
+				//##################################################
+				_PrintTextNS(TEXT("Login Error!!!"));
+				//##################################################
 #endif
-						ReadFoodGroupsFamiliesPacket(&FoodGroups);
-						CreateFoodGroupsVersionsPacket(nSequence,&FoodGroups);
-
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Set Foods Group Versions"));
-						//##################################################
-#endif
-
-						Send(sock);
-						SequenceIncrement();
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_VERSIONS))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Services Versions"));
-						_PrintTextNS(TEXT("Get Services Versions"));
-						//##################################################
-#endif
-
-						ReadFoodGroupsVersionsPacket(&FoodGroups);
-
-						//Send(sock);
-						//SequenceIncrement();
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_MESSAGEOFTHEDAY))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Message of the Day"));
-						//##################################################
-#endif
-						CreateRequestRatesPacket(nSequence);
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Create Request Rates"));
-						//##################################################
-#endif
-
-						Send(sock);
-						SequenceIncrement();
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_WELLKNOWNURLS))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Well known URLs"));
-						//##################################################
-#endif
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_RATELIMITS))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Rate Limits"));
-						//##################################################
-#endif
-						CreateAcceptRatesPacket(nSequence);
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Accept Rate Limits"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-
-						CreateRequestRosterFirstTimePacket(nSequence);
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Request Roster (First Time)"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_ROSTER))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Roster"));
-						//##################################################
-#endif
-						CreateLoadRosterAfterLoginPacket(nSequence);
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Load Roster (After Login)"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-
-						CreateSetICBMParametersPacket(nSequence);
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Set ICMB Parameters"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-
-						CreateRequestBuddyParametersPacket(nSequence);
-
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Request Buddy Parameters"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ONLINEINFO))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Request Online Info"));
-						//##################################################
-#endif
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_EXTENDEDSTATUS))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Extended Status"));
-						//##################################################
-#endif
-					}
-					else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_PARAMETERS))
-					{
-#ifdef  _DEBUG
-						//##################################################
-						_PrintTextNS(TEXT("Buddy Parameters"));
-						//##################################################
-#endif
-
-						CreateSetStatusPacket(nSequence,ICQ_STATUS_ONLINE);
-
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Set Status"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-
-						CreateClientReadyPacket(nSequence);
-
-#ifdef  _DEBUG
-						//##################################################
-						_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Client Ready"));
-						//##################################################
-#endif
-						Send(sock);
-						SequenceIncrement();
-
-						return TRUE;
-					}
-					else
-					{
-#ifdef  _DEBUG
-						//##################################################
-						//_PrintHEXTable(GetPacketPointer(),GetPacketSize());
-						_PrintTextNS(TEXT("Unknown"));
-						//##################################################
-#endif
-					}
+				switch(GetTLV_u16(ICQ_TLV_AUTHERRORCODE))
+				{
+				case 1:
+					break;
+				default:
+					nError=SICQ_ERROR_UNKNOWN;
 				}
 			}
 		}
-
-		nError=SICQ_ERROR_SUCCESS;
 	}
 	else
 	{
@@ -431,13 +458,13 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 	case WM_SICQ_EVENTWND_LOGIN:
 
-		if(((SICQ *)lParam)->ICQLogin())
-		{
+		((SICQ *)lParam)->ICQLogin();
+		
 			while(TRUE)
 			{
 
 			}
-		}
+		
 
 		break;
 

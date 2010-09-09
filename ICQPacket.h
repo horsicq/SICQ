@@ -50,9 +50,11 @@ private:
 	unsigned short Get_u16_BE_FromOffset(char *pOffset);
 
 	int Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid);
+
 protected:
 	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
 	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
+	unsigned short GetTLV_u16(unsigned short Type);
 	bool IsHelloPacket();
 	bool IsSNACPresent(unsigned short family,unsigned short subtype);
 
@@ -67,6 +69,8 @@ protected:
 	int CreateRequestBuddyParametersPacket(int nSequence);
 	int CreateSetStatusPacket(int nSequence,int nStatus);
 	int CreateClientReadyPacket(int nSequence);
+	bool IsErrorChannel();
+	bool IsSignOffChannel();
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

@@ -265,15 +265,15 @@ int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 	Add_u32_BE(0x00000001); // Version
 	Add_TLV_string(ICQ_TLV_UIN,pszUIN);
 	Add_TLV_password(ICQ_TLV_PASSWORD,pszPassword);
-	Add_TLV_string(ICQ_TLV_CLIENT_ID_STRING,TEXT("ICQ Inc. - Product of ICQ (TM).2002a.5.37.1.3728.85"));
-	Add_TLV_u16(ICQ_TLV_CLIENT_ID,0x010A);
-	Add_TLV_u16(ICQ_TLV_CLIENT_MAJOR_VER,0x0005);
-	Add_TLV_u16(ICQ_TLV_CLIENT_MINOR_VER,0x0025);
-	Add_TLV_u16(ICQ_TLV_CLIENT_LESSER_VER,0x0001);
-	Add_TLV_u16(ICQ_TLV_CLIENT_BUILD_NUM,0x0E90);
-	Add_TLV_u32(ICQ_TLV_DISTRIB_NUMBER,0x00005500);
-	Add_TLV_string(ICQ_TLV_CLIENT_LANG,TEXT("en"));
-	Add_TLV_string(ICQ_TLV_CLIENT_COUNTRY,TEXT("us"));
+	Add_TLV_string(ICQ_TLV_CLIENTIDSTRING,TEXT("ICQ Inc. - Product of ICQ (TM).2002a.5.37.1.3728.85"));
+	Add_TLV_u16(ICQ_TLV_CLIENTID,0x010A);
+	Add_TLV_u16(ICQ_TLV_CLIENTMAJORVER,0x0005);
+	Add_TLV_u16(ICQ_TLV_CLIENTMINORVER,0x0025);
+	Add_TLV_u16(ICQ_TLV_CLIENTLESSERVER,0x0001);
+	Add_TLV_u16(ICQ_TLV_CLIENTBUILDNUM,0x0E90);
+	Add_TLV_u32(ICQ_TLV_DISTRIBNUMBER,0x00005500);
+	Add_TLV_string(ICQ_TLV_CLIENTLANG,TEXT("en"));
+	Add_TLV_string(ICQ_TLV_CLIENTCOUNTRY,TEXT("us"));
 
 	return nPacketSize;
 }
@@ -298,7 +298,7 @@ int ICQPacket::CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize
 	SetFLAPHeader(ICQ_CHANNEL_SIGNON,nSequence);
 
 	Add_u32_BE(0x00000001); // Version
-	Add_TLV_blob(ICQ_TLV_AUTH_COOKIE,pCookies,nCookiesSize);
+	Add_TLV_blob(ICQ_TLV_AUTHCOOKIE,pCookies,nCookiesSize);
 
 	return nPacketSize;
 }
@@ -340,6 +340,7 @@ unsigned short ICQPacket::GetTLVLehgthFromOffset(char *pOffset)
 {
 	return ntohs(((TLV *)pOffset)->Length);
 }
+
 //! Get TLV bytes
 //! \param Type TLV type.
 //! \param pBuffer [out] a pointer to a buffer that receives TLV bytes.
@@ -387,6 +388,20 @@ int ICQPacket::GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLen
 			_Free(pBuffer);
 
 			return nSize;
+		}
+	}
+	return 0;
+}
+unsigned short ICQPacket::GetTLV_u16(unsigned short Type)
+{
+
+	char *pOffset=GetTLVPointer(Type);
+
+	if(pOffset)
+	{
+		if(GetTLVLehgthFromOffset(pOffset)==2)
+		{
+			return htons(*((unsigned short *)(pOffset+sizeof(TLV))));
 		}
 	}
 	return 0;
@@ -837,4 +852,12 @@ int ICQPacket::CreateClientReadyPacket(int nSequence)
 	Add_u16_BE(0x164F);
 
 	return nPacketSize;
+}
+bool ICQPacket::IsErrorChannel()
+{
+	return (GetFLAPChannel()==ICQ_CHANNEL_ERROR);
+}
+bool ICQPacket::IsSignOffChannel()
+{
+	return (GetFLAPChannel()==ICQ_CHANNEL_SIGNOFF);
 }
