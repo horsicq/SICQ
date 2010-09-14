@@ -6,6 +6,7 @@
 #include "Net.h"
 
 
+//! A class for low-level work with ICQ-packets
 
 class ICQPacket
 {

@@ -421,6 +421,15 @@ void SICQ::ICQLogin()
 				_PrintTextNS(TEXT("Login Error!!!"));
 				//##################################################
 #endif
+
+#ifdef  _DEBUG
+				//##################################################
+				TCHAR szBuffer[256];
+				wsprintf(szBuffer,TEXT("Ather Error Code %X"),GetTLV_u16(ICQ_TLV_AUTHERRORCODE));
+				_PrintTextNS(szBuffer);
+				//##################################################
+#endif
+
 				switch(GetTLV_u16(ICQ_TLV_AUTHERRORCODE))
 				{
 				case 1:
