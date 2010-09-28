@@ -4,7 +4,7 @@
 
 
 //! Constructor
-//! \param [in] hMainWnd Das ist ein Handle des Fensters, das alle Events bekommen muss
+//! \param [in] hMainWnd a handle to the window
 SICQ::SICQ(HWND hMainWnd)
 {
 	this->hMainWnd=hMainWnd;
@@ -41,6 +41,9 @@ TCHAR *SICQ::GetErrorString()
 		break;
 	case SICQ_ERROR_CANNOTCONNECTTOSERVER:
 		pszErrorString=TEXT("Cannot connect to Server");
+		break;
+	case SICQ_ERROR_INCORRECTUINORPASSWORD:
+		pszErrorString=TEXT("Incorrect UIN or Password");
 		break;
 	default:
 		pszErrorString=TEXT("Unknown!!!");
@@ -425,14 +428,16 @@ void SICQ::ICQLogin()
 #ifdef  _DEBUG
 				//##################################################
 				TCHAR szBuffer[256];
-				wsprintf(szBuffer,TEXT("Ather Error Code %X"),GetTLV_u16(ICQ_TLV_AUTHERRORCODE));
+				wsprintf(szBuffer,TEXT("Auther Error Code %X"),GetTLV_u16(ICQ_TLV_AUTHERRORCODE));
 				_PrintTextNS(szBuffer);
 				//##################################################
 #endif
 
 				switch(GetTLV_u16(ICQ_TLV_AUTHERRORCODE))
 				{
-				case 1:
+				case ICQ_AUTHERROR_INCORRECTNICKORPASS:
+				case ICQ_AUTHERROR_MISMATCHNICKORPASS:
+					nError=SICQ_ERROR_INCORRECTUINORPASSWORD;
 					break;
 				default:
 					nError=SICQ_ERROR_UNKNOWN;
