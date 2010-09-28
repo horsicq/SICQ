@@ -570,63 +570,66 @@ bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *fgs)
 		return false;
 	}
 }
-
-int ICQPacket::CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *fgs)
+//! \param nSequence [in] a Sequence
+//! \param pFgs [in] a pointer to FOODGROUPS structure
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV, FOODGROUPS
+int ICQPacket::CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *pFgs)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_REQUESTVERSIONS,0,nSequence);
 
-	if(fgs->Unk1.Support)
+	if(pFgs->Unk1.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_UNK1);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->Oservice.Support)
+	if(pFgs->Oservice.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_OSERVICE);
 		Add_u16_BE(0x0004); // Version
 	}
-	if(fgs->SSI.Support)
+	if(pFgs->SSI.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_SSI);
 		Add_u16_BE(0x0004); // Version
 	}
-	if(fgs->Locate.Support)
+	if(pFgs->Locate.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_LOCATE);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->Buddy.Support)
+	if(pFgs->Buddy.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_BUDDY);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->Spec.Support)
+	if(pFgs->Spec.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_SPEC);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->ICBM.Support)
+	if(pFgs->ICBM.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_ICBM);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->Invite.Support)
+	if(pFgs->Invite.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_INVITE);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->PD.Support)
+	if(pFgs->PD.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_PD);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->Lookup.Support)
+	if(pFgs->Lookup.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_LOOKUP);
 		Add_u16_BE(0x0001); // Version
 	}
-	if(fgs->Stats.Support)
+	if(pFgs->Stats.Support)
 	{
 		Add_u16_BE(ICQ_SNAC_FOODGROUP_STATS);
 		Add_u16_BE(0x0001); // Version
@@ -723,6 +726,9 @@ bool ICQPacket::ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs)
 		return false;
 	}
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateRequestRatesPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -730,6 +736,9 @@ int ICQPacket::CreateRequestRatesPacket(int nSequence)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateAcceptRatesPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -743,6 +752,9 @@ int ICQPacket::CreateAcceptRatesPacket(int nSequence)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateRequestRosterFirstTimePacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -750,6 +762,9 @@ int ICQPacket::CreateRequestRosterFirstTimePacket(int nSequence)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateLoadRosterAfterLoginPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -757,6 +772,9 @@ int ICQPacket::CreateLoadRosterAfterLoginPacket(int nSequence)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateSetICBMParametersPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -771,6 +789,9 @@ int ICQPacket::CreateSetICBMParametersPacket(int nSequence)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateRequestBuddyParametersPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -782,6 +803,10 @@ int ICQPacket::CreateRequestBuddyParametersPacket(int nSequence)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \param nStatus [in] a ICQ status
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
@@ -791,6 +816,9 @@ int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
 
 	return nPacketSize;
 }
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP, TLV
 int ICQPacket::CreateClientReadyPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
