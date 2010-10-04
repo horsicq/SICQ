@@ -4,7 +4,7 @@
 
 
 //! Constructor
-//! \param [in] hMainWnd a handle to the window
+//! \param [in] hMainWnd a handle to the window whose window procedure will receive the message
 SICQ::SICQ(HWND hMainWnd)
 {
 	this->hMainWnd=hMainWnd;
@@ -16,7 +16,7 @@ SICQ::SICQ(HWND hMainWnd)
 	Start();
 }
 
-
+//! Destructor
 SICQ::~SICQ(void)
 {
 	Stop();

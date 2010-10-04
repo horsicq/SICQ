@@ -2,12 +2,13 @@
 #include "ICQPacket.h"
 
 
+//! Constructor
 ICQPacket::ICQPacket(void)
 {
 	pPacket=(char *)_Alloc(ICQPACKET_MAXPACKETSIZE);
 	nPacketSize=0;
 }
-
+//! Destructor
 ICQPacket::~ICQPacket(void)
 {
 	_Free(pPacket);
@@ -60,6 +61,17 @@ int ICQPacket::Recv(SOCKET sock)
 				nPacketSize=0;
 			}
 		}
+		else
+		{
+
+#ifdef  _DEBUG
+			//##################################################
+			_PrintTextNS(TEXT("It's not FLAP"));
+			//##################################################
+#endif
+		}
+
+
 	}
 
 	return nPacketSize;
@@ -392,6 +404,10 @@ int ICQPacket::GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLen
 	}
 	return 0;
 }
+//! Get TLV short int
+//! \param Type TLV type.
+//! \return TLV short int
+//! \sa TLV
 unsigned short ICQPacket::GetTLV_u16(unsigned short Type)
 {
 
@@ -471,6 +487,12 @@ unsigned int ICQPacket::GetSNACRequestid()
 		return 0;
 	}
 }
+//! IsSNACPresent
+//! \param family [in] a SNAC family
+//! \param subtype [in] a SNAC subtype
+//! \return true if success
+//! \return false if fail
+//! \sa FLAP, SNAC
 bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 {
 	return ((GetSNACFamily()==family)&&(GetSNACSubtype()==subtype));
@@ -498,10 +520,14 @@ int ICQPacket::GetSNACDataSize()
 		return 0;
 	}
 }
-
-bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *fgs)
+//! ReadFoodGroupsFamiliesPacket
+//! \param pFgs [in] a pointer to FOODGROUPS structure
+//! \return true if success
+//! \return false if fail
+//! \sa FLAP, TLV, FOODGROUPS
+bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *pFgs)
 {
-	_ZeroMemory(fgs,sizeof(FOODGROUPS));
+	_ZeroMemory(pFgs,sizeof(FOODGROUPS));
 
 	int nSize=GetSNACDataSize();
 	char *pOffset=GetSNACDataPointer();
@@ -513,49 +539,49 @@ bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *fgs)
 			switch(Get_u16_BE_FromOffset(pOffset))
 			{
 			case ICQ_SNAC_FOODGROUP_OSERVICE:
-				fgs->Oservice.Support=true;
+				pFgs->Oservice.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_LOCATE:
-				fgs->Locate.Support=true;
+				pFgs->Locate.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_BUDDY:
-				fgs->Buddy.Support=true;
+				pFgs->Buddy.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_ICBM:
-				fgs->ICBM.Support=true;
+				pFgs->ICBM.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_INVITE:
-				fgs->Invite.Support=true;
+				pFgs->Invite.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_POPUP:
-				fgs->Popup.Support=true;
+				pFgs->Popup.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_PD:
-				fgs->PD.Support=true;
+				pFgs->PD.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_LOOKUP:
-				fgs->Lookup.Support=true;
+				pFgs->Lookup.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_STATS:
-				fgs->Stats.Support=true;
+				pFgs->Stats.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_TRANS:
-				fgs->Trans.Support=true;
+				pFgs->Trans.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_SSI:
-				fgs->SSI.Support=true;
+				pFgs->SSI.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_SPEC:
-				fgs->Spec.Support=true;
+				pFgs->Spec.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_UNK1:
-				fgs->Unk1.Support=true;
+				pFgs->Unk1.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_UNK2:
-				fgs->Unk2.Support=true;
+				pFgs->Unk2.Support=true;
 				break;
 			case ICQ_SNAC_FOODGROUP_UNK3:
-				fgs->Unk3.Support=true;
+				pFgs->Unk3.Support=true;
 				break;
 			}
 
@@ -570,6 +596,7 @@ bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *fgs)
 		return false;
 	}
 }
+//! CreateFoodGroupsVersionsPacket
 //! \param nSequence [in] a Sequence
 //! \param pFgs [in] a pointer to FOODGROUPS structure
 //! \return a size of ICQ Packet
@@ -656,8 +683,12 @@ int ICQPacket::Add_SNACHeader(unsigned short family,unsigned short subtype,unsig
 
 	return sizeof(SNAC);
 }
-
-bool ICQPacket::ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs)
+//! ReadFoodGroupsVersionsPacket
+//! \param pFgs [in] a pointer to FOODGROUPS structure
+//! \return true if success
+//! \return false if fail
+//! \sa FLAP, TLV, FOODGROUPS
+bool ICQPacket::ReadFoodGroupsVersionsPacket(FOODGROUPS *pFgs)
 {
 	int nSize=GetSNACDataSize();
 	char *pOffset=GetSNACDataPointer();
@@ -669,49 +700,49 @@ bool ICQPacket::ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs)
 			switch(Get_u16_BE_FromOffset(pOffset))
 			{
 			case ICQ_SNAC_FOODGROUP_OSERVICE:
-				fgs->Oservice.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Oservice.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_LOCATE:
-				fgs->Locate.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Locate.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_BUDDY:
-				fgs->Buddy.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Buddy.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_ICBM:
-				fgs->ICBM.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->ICBM.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_INVITE:
-				fgs->Invite.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Invite.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_POPUP:
-				fgs->Popup.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Popup.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_PD:
-				fgs->PD.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->PD.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_LOOKUP:
-				fgs->Lookup.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Lookup.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_STATS:
-				fgs->Stats.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Stats.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_TRANS:
-				fgs->Trans.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Trans.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_SSI:
-				fgs->SSI.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->SSI.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_SPEC:
-				fgs->Spec.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Spec.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_UNK1:
-				fgs->Unk1.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Unk1.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_UNK2:
-				fgs->Unk2.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Unk2.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			case ICQ_SNAC_FOODGROUP_UNK3:
-				fgs->Unk3.Version=Get_u16_BE_FromOffset(pOffset+2);
+				pFgs->Unk3.Version=Get_u16_BE_FromOffset(pOffset+2);
 				break;
 			}
 
@@ -881,10 +912,18 @@ int ICQPacket::CreateClientReadyPacket(int nSequence)
 
 	return nPacketSize;
 }
+//! IsErrorChannel
+//! \return true if error channel
+//! \return false if not
+//! \sa FLAP
 bool ICQPacket::IsErrorChannel()
 {
 	return (GetFLAPChannel()==ICQ_CHANNEL_ERROR);
 }
+//! IsSignOffChannel
+//! \return true if sign off channel
+//! \return false if not
+//! \sa FLAP
 bool ICQPacket::IsSignOffChannel()
 {
 	return (GetFLAPChannel()==ICQ_CHANNEL_SIGNOFF);
