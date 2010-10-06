@@ -75,17 +75,45 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 //! the return value is zero.
 int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 {
+#ifdef  _DEBUG
+	//##################################################
+	TCHAR szBuffer[256];
+	//##################################################
+#endif
 
-	int nSize=0;
+	int nSize=0,nResult=0;
 
 	for(int i=0,j=nBufferSize;j>0;i+=1000,j-=1000)
 	{
-		nSize+=recv(sock,&pBuffer[i],_MinInt(j,1000),0);
+		nResult=recv(sock,&pBuffer[i],_MinInt(j,1000),0);
+		if(nResult!=SOCKET_ERROR)
+		{
+			nSize+=nResult;
+		}
+		else
+		{
+			nSize=0;
+			j=0;
+#ifdef  _DEBUG
+			//##################################################
+			wsprintf(szBuffer,TEXT("Socket Error!!!(%X code)"),WSAGetLastError());
+			_PrintTextNS(szBuffer);
+			LPVOID lpMsgBuf;
+			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
+				NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPTSTR) &lpMsgBuf, 0, NULL);
+			_PrintTextNS((PTSTR)lpMsgBuf);
+
+			//##################################################
+#endif
+		}
+		
 	}
 
 #ifdef  _DEBUG
 	//##################################################
-	TCHAR szBuffer[256];
+
 	wsprintf(szBuffer,TEXT("Recv %d(%X) bytes"),nSize,nSize);
 	_PrintTextNS(szBuffer);
 	//##################################################

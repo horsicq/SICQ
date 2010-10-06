@@ -138,6 +138,7 @@ void SICQ::ICQLogin()
 	if(_connect(sock,szServerIP,nServerPort))
 	{
 		Recv(sock);
+
 		if(IsHelloPacket())
 		{
 #ifdef  _DEBUG
@@ -156,7 +157,6 @@ void SICQ::ICQLogin()
 #endif
 			Send(sock);
 			SequenceIncrement();
-
 
 			Recv(sock);
 

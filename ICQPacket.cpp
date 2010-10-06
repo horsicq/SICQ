@@ -32,7 +32,7 @@ int ICQPacket::Recv(SOCKET sock)
 {
 	nPacketSize=0;
 
-	if(_recv(sock,pPacket,sizeof(FLAP)))
+	if(_recv(sock,pPacket,sizeof(FLAP_HEADER)))
 	{
 		if(IsFLAPPacket())
 		{
@@ -46,9 +46,9 @@ int ICQPacket::Recv(SOCKET sock)
 			//##################################################
 #endif
 
-			if(_recv(sock,pPacket+sizeof(FLAP),nPacketSize))
+			if(_recv(sock,pPacket+sizeof(FLAP_HEADER),nPacketSize))
 			{
-				nPacketSize+=sizeof(FLAP);
+				nPacketSize+=sizeof(FLAP_HEADER);
 
 //#ifdef  _DEBUG
 //				//##################################################
@@ -98,28 +98,28 @@ int ICQPacket::Send(SOCKET sock)
 //! Is Packet FLAP
 //! \return true  if success
 //! \return false if fail
-//! \sa FLAP
+//! \sa FLAP_HEADER
 bool ICQPacket::IsFLAPPacket()
 {
-	return *pPacket==ICQ_FLAPSIGNATURE;
+	return *pPacket==ICQ_FLAP_SIGNATURE;
 }
 //! \return FLAP channel
-//! \sa FLAP
+//! \sa FLAP_HEADER
 unsigned char ICQPacket::GetFLAPChannel()
 {
-	return ((FLAP *)pPacket)->channel;
+	return ((FLAP_HEADER *)pPacket)->channel;
 }
 //! \return FLAP sequence
-//! \sa FLAP
+//! \sa FLAP_HEADER
 unsigned short ICQPacket::GetFLAPSequence()
 {
-	return (ntohs)(((FLAP *)pPacket)->sequence);
+	return (ntohs)(((FLAP_HEADER *)pPacket)->sequence);
 }
 //! \return FLAP DataSize
-//! \sa FLAP
+//! \sa FLAP_HEADER
 unsigned short ICQPacket::GetFLAPDataSize()
 {
-	return (ntohs)(((FLAP *)pPacket)->DataSize);
+	return (ntohs)(((FLAP_HEADER *)pPacket)->lenght);
 }
 //! \return true  if success
 //! \return false if fail
@@ -128,36 +128,36 @@ bool ICQPacket::IsHelloPacket()
 	char channel=GetFLAPChannel();
 	int DataSize=GetFLAPDataSize();
 
-	return (channel==ICQ_CHANNEL_SIGNON)&&(DataSize==4);
+	return (channel==ICQ_FLAP_CHANNEL_SIGNON)&&(DataSize==4);
 }
 
 void ICQPacket::SetFLAPChannel(unsigned char channel)
 {
-	((FLAP *)pPacket)->channel=channel;
+	((FLAP_HEADER *)pPacket)->channel=channel;
 }
 void ICQPacket::SetFLAPSequence(unsigned short sequence)
 {
-	((FLAP *)pPacket)->sequence=htons(sequence);
+	((FLAP_HEADER *)pPacket)->sequence=htons(sequence);
 }
 void ICQPacket::SetFLAPDataSize(unsigned short DataSize)
 {
-	((FLAP *)pPacket)->DataSize=htons(DataSize);
+	((FLAP_HEADER *)pPacket)->lenght=htons(DataSize);
 }
 void ICQPacket::SetFLAPHeader(char Channel,short Sequence)
 {
-	((FLAP *)pPacket)->id=0x2A;
+	((FLAP_HEADER *)pPacket)->signature=0x2A;
 	SetFLAPChannel(Channel);
 	SetFLAPSequence(Sequence);
 	SetFLAPDataSize(0);
 
-	nPacketSize=sizeof(FLAP);
+	nPacketSize=sizeof(FLAP_HEADER);
 }
 int ICQPacket::Add_u8(unsigned char cU8)
 {
 	*(pPacket+nPacketSize)=cU8;
 	nPacketSize++;
 
-	SetFLAPDataSize(nPacketSize-sizeof(FLAP));
+	SetFLAPDataSize(nPacketSize-sizeof(FLAP_HEADER));
 
 	return 1;
 }
@@ -166,7 +166,7 @@ int ICQPacket::Add_u16_BE(unsigned short sU16)
 	*(unsigned short *)(pPacket+nPacketSize)=htons(sU16);
 	nPacketSize+=2;
 
-	SetFLAPDataSize(nPacketSize-sizeof(FLAP));
+	SetFLAPDataSize(nPacketSize-sizeof(FLAP_HEADER));
 
 	return 2;
 }
@@ -175,7 +175,7 @@ int ICQPacket::Add_u32_BE(unsigned int nU32)
 	*(unsigned int *)(pPacket+nPacketSize)=htonl(nU32);
 	nPacketSize+=4;
 
-	SetFLAPDataSize(nPacketSize-sizeof(FLAP));
+	SetFLAPDataSize(nPacketSize-sizeof(FLAP_HEADER));
 
 	return 4;
 }
@@ -184,7 +184,7 @@ int ICQPacket::Add_blob(char *bData,int nDataSize)
 	_CopyMemory(pPacket+nPacketSize,bData,nDataSize);
 	nPacketSize+=nDataSize;
 
-	SetFLAPDataSize(nPacketSize-sizeof(FLAP));
+	SetFLAPDataSize(nPacketSize-sizeof(FLAP_HEADER));
 
 	return nDataSize;
 }
@@ -205,28 +205,28 @@ int ICQPacket::Add_TLVHeader(unsigned short Type,unsigned short Length)
 	Add_u16_BE(Type);
 	Add_u16_BE(Length);
 
-	return sizeof(TLV);
+	return sizeof(TLV_HEADER);
 }
 int ICQPacket::Add_TLV_u16(unsigned short Type,unsigned short sU16)
 {
 	Add_TLVHeader(Type,2);
 	Add_u16_BE(sU16);
 
-	return 2+sizeof(TLV);
+	return 2+sizeof(TLV_HEADER);
 }
 int ICQPacket::Add_TLV_u32(unsigned short Type,unsigned int nU32)
 {
 	Add_TLVHeader(Type,4);
 	Add_u32_BE(nU32);
 
-	return 4+sizeof(TLV);
+	return 4+sizeof(TLV_HEADER);
 }
 int ICQPacket::Add_TLV_blob(unsigned short Type,char *bData,int nDataSize)
 {
 	Add_TLVHeader(Type,nDataSize);
 	Add_blob(bData,nDataSize);
 
-	return nDataSize+sizeof(TLV);
+	return nDataSize+sizeof(TLV_HEADER);
 }
 int ICQPacket::Add_TLV_string(unsigned short Type,TCHAR *pszString)
 {
@@ -235,7 +235,7 @@ int ICQPacket::Add_TLV_string(unsigned short Type,TCHAR *pszString)
 	Add_TLVHeader(Type,nStringLength);
 	Add_string(pszString);
 
-	return nStringLength+sizeof(TLV);
+	return nStringLength+sizeof(TLV_HEADER);
 }
 int ICQPacket::Add_TLV_empty(unsigned short Type)
 {
@@ -262,17 +262,17 @@ int ICQPacket::Add_TLV_password(unsigned short Type,TCHAR *pszPassword)
 
 	_Free(pChars);
 
-	return nPasswordLength+sizeof(TLV);
+	return nPasswordLength+sizeof(TLV_HEADER);
 }
 //! CreateLoginPacket
 //! \param nSequence [in] a Sequence
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN
 //! \param pszPassword [in] a pointer to a buffer that contains ICQ Password
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SIGNON,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SIGNON,nSequence);
 
 	Add_u32_BE(0x00000001); // Version
 	Add_TLV_string(ICQ_TLV_UIN,pszUIN);
@@ -292,10 +292,10 @@ int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 //! CreateGoodByePacket
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateGoodByePacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SIGNOFF,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SIGNOFF,nSequence);
 
 	return nPacketSize;
 }
@@ -304,10 +304,10 @@ int ICQPacket::CreateGoodByePacket(int nSequence)
 //! \param pCookies [in] a pointer to a buffer that contains cookies data
 //! \param nCookiesSize [in] a size of cookies data
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SIGNON,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SIGNON,nSequence);
 
 	Add_u32_BE(0x00000001); // Version
 	Add_TLV_blob(ICQ_TLV_AUTHCOOKIE,pCookies,nCookiesSize);
@@ -324,9 +324,9 @@ char *ICQPacket::GetTLVPointer(unsigned short Type)
 	int nDataSize=nPacketSize;
 	char *pOffset=pPacket;
 
-	if(nDataSize>=sizeof(TLV))
+	if(nDataSize>=sizeof(TLV_HEADER))
 	{
-		pOffset+=sizeof(FLAP);
+		pOffset+=sizeof(FLAP_HEADER);
 
 		while(nDataSize>0)
 		{
@@ -336,8 +336,8 @@ char *ICQPacket::GetTLVPointer(unsigned short Type)
 			}
 			else
 			{
-				nDataSize-=sizeof(TLV)+GetTLVLehgthFromOffset(pOffset);
-				pOffset+=sizeof(TLV)+GetTLVLehgthFromOffset(pOffset);
+				nDataSize-=sizeof(TLV_HEADER)+GetTLVLehgthFromOffset(pOffset);
+				pOffset+=sizeof(TLV_HEADER)+GetTLVLehgthFromOffset(pOffset);
 			}
 		}
 	}
@@ -346,11 +346,11 @@ char *ICQPacket::GetTLVPointer(unsigned short Type)
 }
 unsigned short ICQPacket::GetTLVTypeFromOffset(char *pOffset)
 {
-	return ntohs(((TLV *)pOffset)->Type);
+	return ntohs(((TLV_HEADER *)pOffset)->type);
 }
 unsigned short ICQPacket::GetTLVLehgthFromOffset(char *pOffset)
 {
-	return ntohs(((TLV *)pOffset)->Length);
+	return ntohs(((TLV_HEADER *)pOffset)->length);
 }
 
 //! Get TLV bytes
@@ -359,7 +359,7 @@ unsigned short ICQPacket::GetTLVLehgthFromOffset(char *pOffset)
 //! \param nBufferSize [in] a size, in characters, of the buffer indicated by pBuffer.
 //! \return if no error occurs, returns the number of bytes.
 //! \return The function returns 0 if it does not succeed.
-//! \sa TLV
+//! \sa TLV_HEADER
 int ICQPacket::GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize)
 {
 	char *pOffset=GetTLVPointer(Type);
@@ -370,7 +370,7 @@ int ICQPacket::GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize)
 
 		if(nSize<=nBufferSize)
 		{
-			_CopyMemory(pBuffer,pOffset+sizeof(TLV),nSize);
+			_CopyMemory(pBuffer,pOffset+sizeof(TLV_HEADER),nSize);
 			return nSize;
 		}
 	}
@@ -382,7 +382,7 @@ int ICQPacket::GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize)
 //! \param nBufferLength [in] a size, in characters, of the buffer indicated by pszBuffer.
 //! \return if no error occurs, returns the number of symbols.
 //! \return The function returns 0 if it does not succeed.
-//! \sa TLV
+//! \sa TLV_HEADER
 int ICQPacket::GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength)
 {
 	char *pOffset=GetTLVPointer(Type);
@@ -394,7 +394,7 @@ int ICQPacket::GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLen
 		if(nSize<=nBufferLength-1)
 		{
 			char *pBuffer=(char *)_Alloc(nSize+1);
-			_CopyMemory(pBuffer,pOffset+sizeof(TLV),nSize);
+			_CopyMemory(pBuffer,pOffset+sizeof(TLV_HEADER),nSize);
 			*(pBuffer+nSize)=0;
 			_CharsToString(pszBuffer,nBufferLength,pBuffer);
 			_Free(pBuffer);
@@ -407,7 +407,7 @@ int ICQPacket::GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLen
 //! Get TLV short int
 //! \param Type TLV type.
 //! \return TLV short int
-//! \sa TLV
+//! \sa TLV_HEADER
 unsigned short ICQPacket::GetTLV_u16(unsigned short Type)
 {
 
@@ -417,7 +417,7 @@ unsigned short ICQPacket::GetTLV_u16(unsigned short Type)
 	{
 		if(GetTLVLehgthFromOffset(pOffset)==2)
 		{
-			return htons(*((unsigned short *)(pOffset+sizeof(TLV))));
+			return htons(*((unsigned short *)(pOffset+sizeof(TLV_HEADER))));
 		}
 	}
 	return 0;
@@ -425,9 +425,9 @@ unsigned short ICQPacket::GetTLV_u16(unsigned short Type)
 
 char *ICQPacket::GetSNACPointer()
 {
-	if(GetPacketSize()>=sizeof(FLAP)+sizeof(SNAC))
+	if(GetPacketSize()>=sizeof(FLAP_HEADER)+sizeof(SNAC_HEADER))
 	{
-		return GetPacketPointer()+sizeof(FLAP);
+		return GetPacketPointer()+sizeof(FLAP_HEADER);
 	}
 	else
 	{
@@ -441,7 +441,7 @@ unsigned short ICQPacket::GetSNACFamily()
 
 	if(pOffset)
 	{
-		return ntohs(((SNAC *)pOffset)->family);
+		return ntohs(((SNAC_HEADER *)pOffset)->family);
 	}
 	else
 	{
@@ -454,7 +454,7 @@ unsigned short ICQPacket::GetSNACSubtype()
 
 	if(pOffset)
 	{
-		return ntohs(((SNAC *)pOffset)->subtype);
+		return ntohs(((SNAC_HEADER *)pOffset)->subtype);
 	}
 	else
 	{
@@ -467,7 +467,7 @@ unsigned short ICQPacket::GetSNACFlags()
 
 	if(pOffset)
 	{
-		return ntohs(((SNAC *)pOffset)->flags);
+		return ntohs(((SNAC_HEADER *)pOffset)->flags);
 	}
 	else
 	{
@@ -480,7 +480,7 @@ unsigned int ICQPacket::GetSNACRequestid()
 
 	if(pOffset)
 	{
-		return ntohl(((SNAC *)pOffset)->requestid);
+		return ntohl(((SNAC_HEADER *)pOffset)->requestid);
 	}
 	else
 	{
@@ -492,7 +492,7 @@ unsigned int ICQPacket::GetSNACRequestid()
 //! \param subtype [in] a SNAC subtype
 //! \return true if success
 //! \return false if fail
-//! \sa FLAP, SNAC
+//! \sa FLAP_HEADER, SNAC_HEADER
 bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 {
 	return ((GetSNACFamily()==family)&&(GetSNACSubtype()==subtype));
@@ -501,7 +501,7 @@ char *ICQPacket::GetSNACDataPointer()
 {
 	if(GetSNACDataSize())
 	{
-		return GetSNACPointer()+sizeof(SNAC);
+		return GetSNACPointer()+sizeof(SNAC_HEADER);
 	}
 	else
 	{
@@ -510,7 +510,7 @@ char *ICQPacket::GetSNACDataPointer()
 }
 int ICQPacket::GetSNACDataSize()
 {
-	int nSize=GetPacketSize()-(sizeof(FLAP)+sizeof(SNAC));
+	int nSize=GetPacketSize()-(sizeof(FLAP_HEADER)+sizeof(SNAC_HEADER));
 	if(nSize>0)
 	{
 		return nSize;
@@ -524,7 +524,7 @@ int ICQPacket::GetSNACDataSize()
 //! \param pFgs [in] a pointer to FOODGROUPS structure
 //! \return true if success
 //! \return false if fail
-//! \sa FLAP, TLV, FOODGROUPS
+//! \sa FLAP_HEADER, TLV_HEADER, FOODGROUPS
 bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *pFgs)
 {
 	_ZeroMemory(pFgs,sizeof(FOODGROUPS));
@@ -600,10 +600,10 @@ bool ICQPacket::ReadFoodGroupsFamiliesPacket(FOODGROUPS *pFgs)
 //! \param nSequence [in] a Sequence
 //! \param pFgs [in] a pointer to FOODGROUPS structure
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV, FOODGROUPS
+//! \sa FLAP_HEADER, TLV_HEADER, FOODGROUPS
 int ICQPacket::CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *pFgs)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_REQUESTVERSIONS,0,nSequence);
 
 	if(pFgs->Unk1.Support)
@@ -681,13 +681,13 @@ int ICQPacket::Add_SNACHeader(unsigned short family,unsigned short subtype,unsig
 	Add_u16_BE(flags);
 	Add_u32_BE(requestid);
 
-	return sizeof(SNAC);
+	return sizeof(SNAC_HEADER);
 }
 //! ReadFoodGroupsVersionsPacket
 //! \param pFgs [in] a pointer to FOODGROUPS structure
 //! \return true if success
 //! \return false if fail
-//! \sa FLAP, TLV, FOODGROUPS
+//! \sa FLAP_HEADER, TLV_HEADER, FOODGROUPS
 bool ICQPacket::ReadFoodGroupsVersionsPacket(FOODGROUPS *pFgs)
 {
 	int nSize=GetSNACDataSize();
@@ -759,20 +759,20 @@ bool ICQPacket::ReadFoodGroupsVersionsPacket(FOODGROUPS *pFgs)
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateRequestRatesPacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_REQUESTRATELIMITS,0,nSequence);
 
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateAcceptRatesPacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ACCEPTRATELIMITS,0,nSequence);
 
 	Add_u16_BE(0x0001);
@@ -785,30 +785,30 @@ int ICQPacket::CreateAcceptRatesPacket(int nSequence)
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateRequestRosterFirstTimePacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_REQUESTROSTERFIRSTTIME,0,nSequence);
 
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateLoadRosterAfterLoginPacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_LOADROSTERAFTERLOGIN,0,nSequence);
 
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateSetICBMParametersPacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_SETPARAMETERS,0,nSequence);
 
 	Add_u16_BE(0x0002);
@@ -822,10 +822,10 @@ int ICQPacket::CreateSetICBMParametersPacket(int nSequence)
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateRequestBuddyParametersPacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_REQUESTPARAMETERS,0,nSequence);
 
 	Add_u16_BE(0x0005);
@@ -837,10 +837,10 @@ int ICQPacket::CreateRequestBuddyParametersPacket(int nSequence)
 //! \param nSequence [in] a Sequence
 //! \param nStatus [in] a ICQ status
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_SETSTATUS,0,nSequence);
 
 	Add_TLV_u32(ICQ_TLV_USERSTATUS,nStatus);
@@ -849,10 +849,10 @@ int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
 }
 //! \param nSequence [in] a Sequence
 //! \return a size of ICQ Packet
-//! \sa FLAP, TLV
+//! \sa FLAP_HEADER, TLV_HEADER
 int ICQPacket::CreateClientReadyPacket(int nSequence)
 {
-	SetFLAPHeader(ICQ_CHANNEL_SNACDATA,nSequence);
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_CLIENTREADY,0,nSequence);
 
 	Add_u16_BE(0x0022);
@@ -915,16 +915,16 @@ int ICQPacket::CreateClientReadyPacket(int nSequence)
 //! IsErrorChannel
 //! \return true if error channel
 //! \return false if not
-//! \sa FLAP
+//! \sa FLAP_HEADER
 bool ICQPacket::IsErrorChannel()
 {
-	return (GetFLAPChannel()==ICQ_CHANNEL_ERROR);
+	return (GetFLAPChannel()==ICQ_FLAP_CHANNEL_ERROR);
 }
 //! IsSignOffChannel
 //! \return true if sign off channel
 //! \return false if not
-//! \sa FLAP
+//! \sa FLAP_HEADER
 bool ICQPacket::IsSignOffChannel()
 {
-	return (GetFLAPChannel()==ICQ_CHANNEL_SIGNOFF);
+	return (GetFLAPChannel()==ICQ_FLAP_CHANNEL_SIGNOFF);
 }
