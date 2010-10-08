@@ -1,4 +1,4 @@
-//! \file SICQ_define.h definitions
+//! \file SICQ_define.h SICQ definitions
 #pragma once
 
 #define SICQ_ERROR_SUCCESS					0
@@ -9,7 +9,11 @@
 #define SICQ_ERROR_UNKNOWN					0xFFFF
 
 
-#define WM_SICQ_EVENTWND_LOGIN				WM_USER+100
+#define WM_SICQ_EVENTWND_LOGIN_PLAIN		WM_USER+100
+#define WM_SICQ_EVENTWND_LOGIN_MD5			WM_USER+101
+
+#define SICQ_STATUS_OFFLINE					0
+#define SICQ_STATUS_ONLINE					1
 
 
 //! \defgroup messages Messages

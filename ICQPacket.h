@@ -1,3 +1,4 @@
+//! \file ICQPacket.h Header for ICQPacket.cpp
 #pragma once
 
 #include "ICQPacket_define.h"

@@ -1,3 +1,5 @@
+//! \file Utils.h Header for Utils.cpp
+
 #pragma once
 #include <windows.h>
 

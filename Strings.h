@@ -1,3 +1,4 @@
+//! \file Strings.h Header for Strings.cpp
 #pragma once
 #include <windows.h>
 #include "Utils.h"

@@ -1,4 +1,4 @@
-//! \file SICQ.h 
+//! \file SICQ.h Header for SICQ.cpp
 
 #pragma once
 #include <shlwapi.h>
@@ -47,6 +47,7 @@ private:
 	int nServerPort;
 	SOCKET sock;
 	int nSequence;
+	int nStatus;
 
 	FOODGROUPS FoodGroups;
 
@@ -59,7 +60,11 @@ private:
 	// Stop
 	bool Stop();
 	// ICQ Login
-	void ICQLogin();
+	bool ICQLoginPlain();
+	// ICQ Login MD5
+	bool ICQLoginMD5();
+
+	void ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int nCookiesSize);
 
 	// CALLBACK function
 	static LRESULT CALLBACK SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -71,7 +76,7 @@ public:
 	TCHAR *GetErrorString();
 	
 	// Login
-	void Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
+	bool Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
 	
 };
 

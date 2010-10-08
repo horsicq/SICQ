@@ -1,4 +1,4 @@
-//! \file ICQPacket_define.h ICQ definitions
+//! \file ICQPacket_define.h ICQPacket definitions
 #pragma once
 
 
