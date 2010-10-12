@@ -8,8 +8,10 @@
 #include "Net.h"
 #include "ICQPacket.h"
 #include "SICQ_define.h"
+#include "List.h"
 
-
+//! \defgroup sicq SICQ
+//! \{
 //! A class for OSCAR protocol (ICQ/AIM)
 /*!
 An application or DLL is required to perform a successful WSAStartup call before it can use SICQ
@@ -35,7 +37,6 @@ WSACleanup();
 
 \sa _LoadWS, _UnloadWS
 */
-
 class SICQ: private ICQPacket
 {
 private:
@@ -49,8 +50,9 @@ private:
 	int nSequence;
 	int nStatus;
 
-	FOODGROUPS FoodGroups;
+	static char HwndList[1000];
 
+	FOODGROUPS FoodGroups;
 	HWND hMainWnd;
 
 	void SequenceIncrement();
@@ -59,12 +61,18 @@ private:
 	bool Start();
 	// Stop
 	bool Stop();
+
+	bool ICQLogin();
 	// ICQ Login
 	bool ICQLoginPlain();
 	// ICQ Login MD5
 	bool ICQLoginMD5();
 
 	void ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int nCookiesSize);
+
+	bool ICQSetStatus(int nStatus);
+
+	int StatusToICQ(int nStatus);
 
 	// CALLBACK function
 	static LRESULT CALLBACK SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -77,8 +85,10 @@ public:
 	
 	// Login
 	bool Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
-	
-};
 
+	bool SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextSize);
+	bool SetStatus(int nStatus);
+};
+//! \}
 
 

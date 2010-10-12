@@ -8,7 +8,8 @@
 
 
 //! A class for low-level work with ICQ-packets
-
+//! \defgroup sicq SICQ
+//! \{
 class ICQPacket
 {
 private:
@@ -80,7 +81,8 @@ public:
 	int GetPacketSize();
 	int Recv(SOCKET sock);
 	int Send(SOCKET sock);
-	int CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
+	int CreatePlainLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
 	int CreateGoodByePacket(int nSequence);
 	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
 };
+//! \}

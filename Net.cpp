@@ -61,6 +61,11 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 #ifdef  _DEBUG
 	//##################################################
 	_PrintTextNS(TEXT("Connect"));
+	TCHAR szBuffer2[256];
+	wsprintf(szBuffer2,TEXT("Server IP: %s"),pszServerIP);
+	_PrintTextNS(szBuffer2);
+	wsprintf(szBuffer2,TEXT("Server port: %d"),nServerPort);
+	_PrintTextNS(szBuffer2);
 	//##################################################
 #endif
 

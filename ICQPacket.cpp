@@ -38,23 +38,9 @@ int ICQPacket::Recv(SOCKET sock)
 		{
 			nPacketSize=GetFLAPDataSize();
 
-#ifdef  _DEBUG
-			//##################################################
-			TCHAR szBuffer[256];
-			wsprintf(szBuffer,TEXT("Packet Size %d(%X) bytes"),nPacketSize,nPacketSize);
-			_PrintTextNS(szBuffer);
-			//##################################################
-#endif
-
 			if(_recv(sock,pPacket+sizeof(FLAP_HEADER),nPacketSize))
 			{
 				nPacketSize+=sizeof(FLAP_HEADER);
-
-//#ifdef  _DEBUG
-//				//##################################################
-//				_PrintHEXTable(pPacket,nPacketSize);
-//				//##################################################
-//#endif
 			}
 			else
 			{
@@ -74,6 +60,15 @@ int ICQPacket::Recv(SOCKET sock)
 
 	}
 
+#ifdef  _DEBUG
+	//##################################################
+	TCHAR szBuffer[256];
+	wsprintf(szBuffer,TEXT("Packet Size %d(%X) bytes"),nPacketSize,nPacketSize);
+	_PrintTextNS(szBuffer);
+	_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! Sends ICQ Packet on a connected socket
@@ -81,19 +76,26 @@ int ICQPacket::Recv(SOCKET sock)
 //! \return If no error occurs, returns the total number of bytes sent
 int ICQPacket::Send(SOCKET sock)
 {
+	int nResult=0;
+
 	if(IsFLAPPacket())
 	{
-//#ifdef  _DEBUG
-//		//##################################################
-//		_PrintHEXTable(pPacket,nPacketSize);
-//		//##################################################
-//#endif
-		return _send(sock,pPacket,nPacketSize);
+		nResult=_send(sock,pPacket,nPacketSize);
+
+		if(nResult)
+		{
+#ifdef  _DEBUG
+			//##################################################
+			TCHAR szBuffer[256];
+			wsprintf(szBuffer,TEXT("Packet Size %d(%X) bytes"),nPacketSize,nPacketSize);
+			_PrintTextNS(szBuffer);
+			_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+			//##################################################
+#endif
+		}
 	}
-	else
-	{
-		return 0;
-	}
+	
+	return nResult;
 }
 //! Is Packet FLAP
 //! \return true  if success
@@ -128,7 +130,24 @@ bool ICQPacket::IsHelloPacket()
 	char channel=GetFLAPChannel();
 	int DataSize=GetFLAPDataSize();
 
-	return (channel==ICQ_FLAP_CHANNEL_SIGNON)&&(DataSize==4);
+	if((channel==ICQ_FLAP_CHANNEL_SIGNON)&&(DataSize==4))
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("It's Hello Packet"));
+		//##################################################
+#endif
+		return true;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("It's NOT Hello Packet"));
+		//##################################################
+#endif
+		return false;
+	}
 }
 
 void ICQPacket::SetFLAPChannel(unsigned char channel)
@@ -264,13 +283,13 @@ int ICQPacket::Add_TLV_password(unsigned short Type,TCHAR *pszPassword)
 
 	return nPasswordLength+sizeof(TLV_HEADER);
 }
-//! CreateLoginPacket
+//! CreatePlainLoginPacket
 //! \param nSequence [in] a Sequence
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN
 //! \param pszPassword [in] a pointer to a buffer that contains ICQ Password
 //! \return a size of ICQ Packet
 //! \sa FLAP_HEADER, TLV_HEADER
-int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
+int ICQPacket::CreatePlainLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 {
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SIGNON,nSequence);
 
@@ -287,6 +306,12 @@ int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 	Add_TLV_string(ICQ_TLV_CLIENTLANG,TEXT("en"));
 	Add_TLV_string(ICQ_TLV_CLIENTCOUNTRY,TEXT("us"));
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Plain Login Packet"));
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! CreateGoodByePacket
@@ -296,6 +321,12 @@ int ICQPacket::CreateLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword)
 int ICQPacket::CreateGoodByePacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SIGNOFF,nSequence);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Goodbye Packet"));
+	//##################################################
+#endif
 
 	return nPacketSize;
 }
@@ -311,6 +342,12 @@ int ICQPacket::CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize
 
 	Add_u32_BE(0x00000001); // Version
 	Add_TLV_blob(ICQ_TLV_AUTHCOOKIE,pCookies,nCookiesSize);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Cookies Packet"));
+	//##################################################
+#endif
 
 	return nPacketSize;
 }
@@ -495,7 +532,115 @@ unsigned int ICQPacket::GetSNACRequestid()
 //! \sa FLAP_HEADER, SNAC_HEADER
 bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 {
-	return ((GetSNACFamily()==family)&&(GetSNACSubtype()==subtype));
+	if((GetSNACFamily()==family)&&(GetSNACSubtype()==subtype))
+	{
+#ifdef  _DEBUG
+		//##################################################
+		TCHAR szBuffer[256];
+		wsprintf(szBuffer,TEXT("It's SNAC(family=%X, subtype=%X)"),family,subtype);
+		_PrintTextNS(szBuffer);
+
+		if(family==ICQ_SNAC_FOODGROUP_OSERVICE)
+		{
+			if(subtype==ICQ_SNAC_OSERVICE_CLIENTREADY)
+			{
+				_PrintTextNS(TEXT("OService: Client Ready"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_FAMILIES)
+			{
+				_PrintTextNS(TEXT("OService: Families"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_REQUESTRATELIMITS)
+			{
+				_PrintTextNS(TEXT("OService: Request Rate Limits"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_RATELIMITS)
+			{
+				_PrintTextNS(TEXT("OService: Rate Limits"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_ACCEPTRATELIMITS)
+			{
+				_PrintTextNS(TEXT("OService: Accept Rate Limits"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_ONLINEINFO)
+			{
+				_PrintTextNS(TEXT("OService: Online Info"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_MESSAGEOFTHEDAY)
+			{
+				_PrintTextNS(TEXT("OService: Message Of The Day"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_WELLKNOWNURLS)
+			{
+				_PrintTextNS(TEXT("OService: Well Known URLs"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_REQUESTVERSIONS)
+			{
+				_PrintTextNS(TEXT("OService: Request Versions"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_VERSIONS)
+			{
+				_PrintTextNS(TEXT("OService: Versions"));
+			}
+			else if(subtype==ICQ_SNAC_OSERVICE_SETSTATUS)
+			{
+				_PrintTextNS(TEXT("OService: Set Status"));
+			}
+			else if(ICQ_SNAC_OSERVICE_EXTENDEDSTATUS)
+			{
+				_PrintTextNS(TEXT("OService: Extended Status"));
+			}
+		}
+		else if(family==ICQ_SNAC_FOODGROUP_BUDDY)
+		{
+			if(subtype==ICQ_SNAC_BUDDY_REQUESTPARAMETERS)
+			{
+				_PrintTextNS(TEXT("Buddy: Request Parameters"));
+			}
+			else if(subtype==ICQ_SNAC_BUDDY_PARAMETERS)
+			{
+				_PrintTextNS(TEXT("Buddy: Parameters"));
+			}
+		}
+		else if(family==ICQ_SNAC_FOODGROUP_ICBM)
+		{
+			if(subtype==ICQ_SNAC_ICBM_SETPARAMETERS)
+			{
+				_PrintTextNS(TEXT("ICBM: Set Parameters"));
+			}
+		}
+		else if(family==ICQ_SNAC_FOODGROUP_SSI)
+		{
+			if(subtype==ICQ_SNAC_SSI_REQUESTROSTERFIRSTTIME)
+			{
+				_PrintTextNS(TEXT("SSI: Request Roster(First Time)"));
+			}
+			else if(subtype==ICQ_SNAC_SSI_ROSTER)
+			{
+				_PrintTextNS(TEXT("SSI: Roster"));
+			}
+			else if(subtype==ICQ_SNAC_SSI_LOADROSTERAFTERLOGIN)
+			{
+				_PrintTextNS(TEXT("SSI: Load Roster After Login"));
+			}
+		}
+		//##################################################
+#endif
+
+		return true;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		TCHAR szBuffer[256];
+		wsprintf(szBuffer,TEXT("It's NOT SNAC(family=%X, subtype=%X)"),family,subtype);
+		_PrintTextNS(szBuffer);
+		//##################################################
+#endif
+
+		return false;
+	}
 }
 char *ICQPacket::GetSNACDataPointer()
 {
@@ -765,6 +910,12 @@ int ICQPacket::CreateRequestRatesPacket(int nSequence)
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_REQUESTRATELIMITS,0,nSequence);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Request Rates Packet"));
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
@@ -781,6 +932,11 @@ int ICQPacket::CreateAcceptRatesPacket(int nSequence)
 	Add_u16_BE(0x0004);
 	Add_u16_BE(0x0005);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Accept Rates Packet"));
+	//##################################################
+#endif
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
@@ -791,6 +947,12 @@ int ICQPacket::CreateRequestRosterFirstTimePacket(int nSequence)
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_REQUESTROSTERFIRSTTIME,0,nSequence);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Request Roster First Time Packet"));
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
@@ -800,6 +962,12 @@ int ICQPacket::CreateLoadRosterAfterLoginPacket(int nSequence)
 {
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_SSI,ICQ_SNAC_SSI_LOADROSTERAFTERLOGIN,0,nSequence);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Load Roster After Login Packet"));
+	//##################################################
+#endif
 
 	return nPacketSize;
 }
@@ -818,6 +986,12 @@ int ICQPacket::CreateSetICBMParametersPacket(int nSequence)
 	Add_u16_BE(0x03E7);
 	Add_u32_BE(0x00000000);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Set ICBM Parameters Packet"));
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
@@ -832,6 +1006,12 @@ int ICQPacket::CreateRequestBuddyParametersPacket(int nSequence)
 	Add_u16_BE(0x0002);
 	Add_u16_BE(0x0003);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Request Buddy Parameters Packet"));
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! \param nSequence [in] a Sequence
@@ -844,6 +1024,12 @@ int ICQPacket::CreateSetStatusPacket(int nSequence,int nStatus)
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_SETSTATUS,0,nSequence);
 
 	Add_TLV_u32(ICQ_TLV_USERSTATUS,nStatus);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Create Set Status Packet"));
+	//##################################################
+#endif
 
 	return nPacketSize;
 }
@@ -910,6 +1096,12 @@ int ICQPacket::CreateClientReadyPacket(int nSequence)
 	Add_u16_BE(0x0110);
 	Add_u16_BE(0x164F);
 
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Client Ready Packet"));
+	//##################################################
+#endif
+
 	return nPacketSize;
 }
 //! IsErrorChannel
@@ -918,7 +1110,24 @@ int ICQPacket::CreateClientReadyPacket(int nSequence)
 //! \sa FLAP_HEADER
 bool ICQPacket::IsErrorChannel()
 {
-	return (GetFLAPChannel()==ICQ_FLAP_CHANNEL_ERROR);
+	if(GetFLAPChannel()==ICQ_FLAP_CHANNEL_ERROR)
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("It's Error Channel"));
+		//##################################################
+#endif
+		return true;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("It's NOT Error Channel"));
+		//##################################################
+#endif
+		return false;
+	}
 }
 //! IsSignOffChannel
 //! \return true if sign off channel
@@ -926,5 +1135,22 @@ bool ICQPacket::IsErrorChannel()
 //! \sa FLAP_HEADER
 bool ICQPacket::IsSignOffChannel()
 {
-	return (GetFLAPChannel()==ICQ_FLAP_CHANNEL_SIGNOFF);
+	if(GetFLAPChannel()==ICQ_FLAP_CHANNEL_SIGNOFF)
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("It's Sigh Off Channel"));
+		//##################################################
+#endif
+	return true;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("It's NOT Sigh Off Channel"));
+		//##################################################
+#endif
+		return false;
+	}
 }
