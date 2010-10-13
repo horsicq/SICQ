@@ -10,7 +10,7 @@
 
 #define WM_SICQ_EVENTWND_LOGIN				WM_USER+101
 //! \param wParam 0
-//! \param lParam 0
+//! \param lParam a pointer to buffer that contains SENDTEXTSTRUCT structur
 #define WM_SICQ_EVENTWND_SENDMESSAGE		WM_USER+102
 //! \param wParam status
 //! \param lParam 0
@@ -41,3 +41,4 @@
 #define WM_SICQ_MAINWND_SENDTEXT			WM_USER+201
 
 //! \}
+

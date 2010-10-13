@@ -220,4 +220,13 @@ struct FOODGROUPS
 	FOODGROUP Unk2;
 	FOODGROUP Unk3;
 };
+struct SENDTEXTSTRUCT
+{
+	int MessageTime;
+	TCHAR *pszUIN;
+	int nCookies1;
+	int nCookies2;
+	TCHAR *pszText;
+	int nTextLength;
+};
 //! \}

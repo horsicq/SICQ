@@ -7,9 +7,10 @@
 #include "Net.h"
 
 
-//! A class for low-level work with ICQ-packets
+
 //! \defgroup sicq SICQ
 //! \{
+//! A class for low-level work with ICQ-packets
 class ICQPacket
 {
 private:
@@ -61,9 +62,9 @@ protected:
 	bool IsHelloPacket();
 	bool IsSNACPresent(unsigned short family,unsigned short subtype);
 
-	bool ReadFoodGroupsFamiliesPacket(FOODGROUPS *fgs);
-	int CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *fgs);
-	bool ReadFoodGroupsVersionsPacket(FOODGROUPS *fgs);
+	bool ReadFoodGroupsFamiliesPacket(FOODGROUPS *pFgs);
+	int CreateFoodGroupsVersionsPacket(int nSequence,FOODGROUPS *pFgs);
+	bool ReadFoodGroupsVersionsPacket(FOODGROUPS *pFgs);
 	int CreateRequestRatesPacket(int nSequence);
 	int CreateAcceptRatesPacket(int nSequence);
 	int CreateRequestRosterFirstTimePacket(int nSequence);
@@ -72,6 +73,7 @@ protected:
 	int CreateRequestBuddyParametersPacket(int nSequence);
 	int CreateSetStatusPacket(int nSequence,int nStatus);
 	int CreateClientReadyPacket(int nSequence);
+	int CreateSendTextUnicodePacket(int nSequence,SENDTEXTSTRUCT *pSts);
 	bool IsErrorChannel();
 	bool IsSignOffChannel();
 public:

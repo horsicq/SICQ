@@ -147,21 +147,37 @@ bool SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPass
 //! Send Text
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN 
 //! \param pszText [in] a pointer to a buffer that contains a text message
-//! \param nTextSize [in] a size of a text message
-//! \return true  if success
-//! \return false if fail
+//! \param nTextLength [in] a length, in characters, of a text message
+//! \return Message ID
 //! \note main window receives #WM_SICQ_MAINWND_SENDTEXT event
-bool SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextSize)
+int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 {
-	return SendMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,0)==1;
+	random rand;
+	SENDTEXTSTRUCT sts;
+	int nMessageID=rand.randomDWORD();
+
+	sts.MessageTime=_LocalTimeAsUnixTime();
+	sts.nCookies1=nMessageID;
+	sts.nCookies2=nMessageID;
+	sts.pszText=pszText;
+	sts.pszUIN=pszUIN;
+	sts.nTextLength=nTextLength;
+
+	SendMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
+
+	return nMessageID;
+}
+void SICQ::SendTextUnicode(SENDTEXTSTRUCT *sts)
+{
+
+	Send(sock);
+	SequenceIncrement();
 }
 //! Set Status
 //! \param nStatus ICQ Status
-//! \return true  if success
-//! \return false if fail
-bool SICQ::SetStatus(int nStatus)
+void SICQ::SetStatus(int nStatus)
 {
-	return SendMessage(hEventWnd,WM_SICQ_EVENTWND_SETSTATUS,nStatus,0)==1;
+	SendMessage(hEventWnd,WM_SICQ_EVENTWND_SETSTATUS,nStatus,0);
 }
 //! Login
 bool SICQ::ICQLogin()
@@ -287,7 +303,7 @@ int SICQ::StatusToICQ(int nStatus)
 	return nResult;
 }
 
-bool SICQ::ICQSetStatus(int nStatus)
+void SICQ::ICQSetStatus(int nStatus)
 {
 	if(nStatus==SICQ_STATUS_OFFLINE)
 	{
@@ -320,7 +336,6 @@ bool SICQ::ICQSetStatus(int nStatus)
 
 	this->nStatus=nStatus;
 
-	return true;
 }
 
 void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int nCookiesSize)
@@ -445,15 +460,25 @@ void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int n
 		nError=SICQ_ERROR_CANNOTCONNECTTOSERVER;
 	}
 }
+void SICQ::DefProc()
+{
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Recv Data"));
+	//##################################################
+#endif
+	Recv(sock);
 
+
+}
 //! CALLBACK function
 LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	List _list;
 	SICQ *pSICQ;
 
-	_list.SetData(HwndList,sizeof(HwndList));
-	pSICQ=(SICQ *)(*((int *)_list.GetEntryByID((int)hWnd)));
+	int nResult=1;
+	
 
 	switch (message)
 	{
@@ -463,27 +488,32 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 	case WM_SICQ_EVENTWND_LOGIN:
 
+		_list.SetData(HwndList,sizeof(HwndList));
+		pSICQ=(SICQ *)(*((int *)_list.GetEntryByID((int)hWnd)));
+
 		//return ((SICQ *)lParam)->ICQLogin();
-		return pSICQ->ICQLogin();
+		nResult=pSICQ->ICQLogin();
 		
 		break;
 
 	case WM_SICQ_EVENTWND_SETSTATUS:
 
+		_list.SetData(HwndList,sizeof(HwndList));
+		pSICQ=(SICQ *)(*((int *)_list.GetEntryByID((int)hWnd)));
+
 		//return ((SICQ *)lParam)->ICQSetStatus(wParam);
-		return pSICQ->ICQSetStatus(wParam);
+		pSICQ->ICQSetStatus(wParam);
+		nResult=1;
 
 		break;
 
 	case WM_SICQ_EVENTWND_RECVDATA:
 
+		_list.SetData(HwndList,sizeof(HwndList));
+		pSICQ=(SICQ *)(*((int *)_list.GetEntryByID((int)hWnd)));
 
-#ifdef  _DEBUG
-		//##################################################
-		_PrintTextNS(TEXT("Recv Data"));
-		//##################################################
-#endif
-
+		//return ((SICQ *)lParam)->ICQSetStatus(wParam);
+		pSICQ->DefProc();
 
 		break;
 
@@ -496,7 +526,7 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		DefWindowProc(hWnd,message,wParam,lParam);
 
 	}
-	return 1;
+	return nResult;
 }
 
 void SICQ::SequenceIncrement()

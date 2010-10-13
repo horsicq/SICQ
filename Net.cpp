@@ -96,6 +96,10 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 		{
 			nSize+=nResult;
 		}
+		else if(WSAGetLastError()==WSAEWOULDBLOCK)
+		{
+
+		}
 		else
 		{
 			nSize=0;

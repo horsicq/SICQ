@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Strings.h"
 
-//! Convert string(TCHAR[]) to chars.
+//! \note Convert string(TCHAR[]) to chars.
 //! \param pszChars [out] a pointer to a buffer that receives the converted string.
 //! \param nCharsSize [in] a size, in bytes, of the buffer indicated by pszChars.
 //! \param pszString [in] a pointer to the Unicode string to convert.
@@ -16,7 +16,7 @@ int _StringToChars(char *pszChars,int nCharsSize,TCHAR *pszString)
 	return lstrlen(pszChars);
 #endif
 }
-//! Convert chars to string(TCHAR[]).
+//! \note Convert chars to string(TCHAR[]).
 //! \param pszString [out] a pointer to a buffer that receives the converted string.
 //! \param nStringLength [in] a length, in characters, of the buffer indicated by pszString.
 //! \param pszChars [in] a pointer to chars to convert.
@@ -31,12 +31,12 @@ int _CharsToString(TCHAR *pszString,int nStringLength,char *pszChars)
 	return lstrlen(pszString);
 #endif
 }
-//! Convert binary data to HEX.
+//! \note Convert binary data to HEX.
 //! \param pData [in] a pointer to binary data.
 //! \param nDataSize [in] a size, in bytes, of binary data.
 //! \param pszHEX [out] a pointer to a buffer that receives the HEX string.
 //! \return the number of characters written to the buffer pointed to by pszHEX if successful.
-//! \return The function returns 0 if it does not succeed. 
+//! \return the function returns 0 if it does not succeed. 
 int _BinToHEX(char *pData,int nDataSize,TCHAR *pszHEX)
 {
 	TCHAR szBuffer[16];
@@ -50,7 +50,7 @@ int _BinToHEX(char *pData,int nDataSize,TCHAR *pszHEX)
 	
 	return lstrlen(pszHEX);
 }
-//! Convert binary data to HEX Table[8].
+//! \note Convert binary data to HEX Table[8].
 //! \param pData [in] a pointer to binary data.
 //! \param nDataSize [in] a size, in bytes, of binary data.
 //! \param pszHEX [out] a pointer to a buffer that receives the HEX string.

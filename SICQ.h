@@ -9,10 +9,11 @@
 #include "ICQPacket.h"
 #include "SICQ_define.h"
 #include "List.h"
+#include "random.h"
+#include "Time.h"
 
 //! \defgroup sicq SICQ
 //! \{
-//! A class for OSCAR protocol (ICQ/AIM)
 /*!
 An application or DLL is required to perform a successful WSAStartup call before it can use SICQ
 \code
@@ -37,6 +38,7 @@ WSACleanup();
 
 \sa _LoadWS, _UnloadWS
 */
+//! A class for OSCAR protocol (ICQ/AIM)
 class SICQ: private ICQPacket
 {
 private:
@@ -70,9 +72,13 @@ private:
 
 	void ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int nCookiesSize);
 
-	bool ICQSetStatus(int nStatus);
+	void ICQSetStatus(int nStatus);
 
 	int StatusToICQ(int nStatus);
+
+	void SendTextUnicode(SENDTEXTSTRUCT *sts);
+
+	void DefProc();
 
 	// CALLBACK function
 	static LRESULT CALLBACK SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -86,8 +92,8 @@ public:
 	// Login
 	bool Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
 
-	bool SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextSize);
-	bool SetStatus(int nStatus);
+	int SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength);
+	void SetStatus(int nStatus);
 };
 //! \}
 

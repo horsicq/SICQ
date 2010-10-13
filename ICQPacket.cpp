@@ -1154,3 +1154,23 @@ bool ICQPacket::IsSignOffChannel()
 		return false;
 	}
 }
+//! CreateSendTextUnicodePacket
+//! \param nSequence [in] a Sequence
+//! \param pSts [in] a pointer to SENDTEXTSTRUCT structure
+//! \return a size of ICQ Packet
+//! \sa FLAP_HEADER, TLV_HEADER, SENDTEXTSTRUCT
+int ICQPacket::CreateSendTextUnicodePacket(int nSequence,SENDTEXTSTRUCT *pSts)
+{
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_ICBM,6,0,nSequence);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("Send Text Unicode"));
+	_PrintTextNS(pSts->pszUIN);
+	_PrintTextNS(pSts->pszText);
+	//##################################################
+#endif
+
+	return nPacketSize;
+}
