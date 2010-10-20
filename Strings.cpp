@@ -74,7 +74,7 @@ int _BinToHEXTable(char *pData,int nDataSize,TCHAR *pszHEX)
 //! \note Convert string(TCHAR[]) to Unicode(WCHAR[]).
 //! \param pszUnicode [out] a pointer to a buffer that receives the converted string.
 //! \param nUnicodeLength [in] a length, in characters, of the buffer indicated by pszUnicode.
-//! \param szString [in] a pointer to string to convert.
+//! \param pszString [in] a pointer to string to convert.
 //! \return the number of characters written to the buffer pointed to by pszUnicode if successful.
 //! \return The function returns 0 if it does not succeed. 
 int _StringToUnicode(WCHAR *pszUnicode,int nUnicodeLength,TCHAR *pszString)
@@ -104,7 +104,7 @@ int _UnicodeToString(TCHAR *pszString,int nStringLength,WCHAR *pszUnicode)
 //! \note Convert chars to Unicode(WCHAR[]).
 //! \param pszUnicode [out] a pointer to a buffer that receives the converted string.
 //! \param nUnicodeLength [in] a length, in characters, of the buffer indicated by pszUnicode.
-//! \param szChars [in] a pointer to chars to convert.
+//! \param pszChars [in] a pointer to chars to convert.
 //! \return the number of characters written to the buffer pointed to by pszUnicode if successful.
 //! \return The function returns 0 if it does not succeed. 
 int _CharsToUnicode(WCHAR *pszUnicode,int nUnicodeLength,char *pszChars)
