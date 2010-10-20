@@ -167,9 +167,9 @@ int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 
 	return nMessageID;
 }
-void SICQ::SendTextUnicode(SENDTEXTSTRUCT *sts)
+void SICQ::ICQSendText(SENDTEXTSTRUCT *pSts)
 {
-
+	CreateSendTextUnicodePacket(nSequence,pSts);
 	Send(sock);
 	SequenceIncrement();
 }
@@ -335,7 +335,6 @@ void SICQ::ICQSetStatus(int nStatus)
 	}
 
 	this->nStatus=nStatus;
-
 }
 
 void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int nCookiesSize)
@@ -467,9 +466,25 @@ void SICQ::DefProc()
 	_PrintTextNS(TEXT("Recv Data"));
 	//##################################################
 #endif
-	Recv(sock);
+	while(Recv(sock))
+	{
+		if(IsSNACPresent(ICQ_SNAC_FOODGROUP_OSERVICE,ICQ_SNAC_OSERVICE_ONLINEINFO))
+		{
 
+		}
+		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_STATS,ICQ_SNAC_STATS_SETMINIMUMINTERVAL))
+		{
 
+		}
+		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_USERONLINE))
+		{
+
+		}
+		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_USEROFFLINE))
+		{
+
+		}
+	}
 }
 //! CALLBACK function
 LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -514,6 +529,16 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 		//return ((SICQ *)lParam)->ICQSetStatus(wParam);
 		pSICQ->DefProc();
+
+		break;
+
+	case WM_SICQ_EVENTWND_SENDMESSAGE:
+
+		_list.SetData(HwndList,sizeof(HwndList));
+		pSICQ=(SICQ *)(*((int *)_list.GetEntryByID((int)hWnd)));
+
+		//return ((SICQ *)lParam)->ICQSetStatus(wParam);
+		pSICQ->ICQSendText((SENDTEXTSTRUCT *)lParam);
 
 		break;
 

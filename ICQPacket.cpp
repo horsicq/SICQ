@@ -62,10 +62,12 @@ int ICQPacket::Recv(SOCKET sock)
 
 #ifdef  _DEBUG
 	//##################################################
+	_PrintTextNS(TEXT("----------[recv]---------------"));
 	TCHAR szBuffer[256];
 	wsprintf(szBuffer,TEXT("Packet Size %d(%X) bytes"),nPacketSize,nPacketSize);
 	_PrintTextNS(szBuffer);
 	_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+	_PrintTextNS(TEXT("-------------------------------"));
 	//##################################################
 #endif
 
@@ -86,10 +88,12 @@ int ICQPacket::Send(SOCKET sock)
 		{
 #ifdef  _DEBUG
 			//##################################################
+			_PrintTextNS(TEXT("----------[send]---------------"));
 			TCHAR szBuffer[256];
 			wsprintf(szBuffer,TEXT("Packet Size %d(%X) bytes"),nPacketSize,nPacketSize);
 			_PrintTextNS(szBuffer);
 			_PrintHEXTable(GetPacketPointer(),GetPacketSize());
+			_PrintTextNS(TEXT("-------------------------------"));
 			//##################################################
 #endif
 		}
@@ -218,6 +222,15 @@ int ICQPacket::Add_string(TCHAR *pszString)
 	_Free(pChars);
 
 	return nStringLength;
+}
+int ICQPacket::Add_string08(TCHAR *pszString)
+{
+	int nLength=lstrlen(pszString);
+
+	Add_u8((char)nLength);
+	nLength+=Add_string(pszString);
+
+	return nLength;
 }
 int ICQPacket::Add_TLVHeader(unsigned short Type,unsigned short Length)
 {
@@ -532,10 +545,14 @@ unsigned int ICQPacket::GetSNACRequestid()
 //! \sa FLAP_HEADER, SNAC_HEADER
 bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 {
+#ifdef  _DEBUG
+	//##################################################
+	_PrintTextNS(TEXT("----------[IsSNACPresent]------"));
+	//##################################################
+#endif
 	if((GetSNACFamily()==family)&&(GetSNACSubtype()==subtype))
 	{
 #ifdef  _DEBUG
-		//##################################################
 		TCHAR szBuffer[256];
 		wsprintf(szBuffer,TEXT("It's SNAC(family=%X, subtype=%X)"),family,subtype);
 		_PrintTextNS(szBuffer);
@@ -601,12 +618,27 @@ bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 			{
 				_PrintTextNS(TEXT("Buddy: Parameters"));
 			}
+			else if(subtype==ICQ_SNAC_BUDDY_USERONLINE)
+			{
+				_PrintTextNS(TEXT("Buddy: User Online"));
+			}
+			else if(subtype==ICQ_SNAC_BUDDY_USEROFFLINE)
+			{
+				_PrintTextNS(TEXT("Buddy: User Offline"));
+			}
 		}
 		else if(family==ICQ_SNAC_FOODGROUP_ICBM)
 		{
 			if(subtype==ICQ_SNAC_ICBM_SETPARAMETERS)
 			{
 				_PrintTextNS(TEXT("ICBM: Set Parameters"));
+			}
+		}
+		else if(family==ICQ_SNAC_FOODGROUP_STATS)
+		{
+			if(subtype==ICQ_SNAC_STATS_SETMINIMUMINTERVAL)
+			{
+				_PrintTextNS(TEXT("Stats: Set Minimum Interval"));
 			}
 		}
 		else if(family==ICQ_SNAC_FOODGROUP_SSI)
@@ -624,6 +656,7 @@ bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 				_PrintTextNS(TEXT("SSI: Load Roster After Login"));
 			}
 		}
+		_PrintTextNS(TEXT("-------------------------------"));
 		//##################################################
 #endif
 
@@ -636,6 +669,7 @@ bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 		TCHAR szBuffer[256];
 		wsprintf(szBuffer,TEXT("It's NOT SNAC(family=%X, subtype=%X)"),family,subtype);
 		_PrintTextNS(szBuffer);
+		_PrintTextNS(TEXT("-------------------------------"));
 		//##################################################
 #endif
 
@@ -1161,8 +1195,35 @@ bool ICQPacket::IsSignOffChannel()
 //! \sa FLAP_HEADER, TLV_HEADER, SENDTEXTSTRUCT
 int ICQPacket::CreateSendTextUnicodePacket(int nSequence,SENDTEXTSTRUCT *pSts)
 {
+	char *pMemory;
+	int nMessageSize=pSts->nTextLength*sizeof(WCHAR);
+
+	pMemory=(char *)_Alloc(nMessageSize);
+	_StringToUnicode((WCHAR *)pMemory,pSts->nTextLength,pSts->pszText);
+	_UnicodeToNet((WCHAR *)pMemory,pSts->nTextLength,(WCHAR *)pMemory);
+
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
-	Add_SNACHeader(ICQ_SNAC_FOODGROUP_ICBM,6,0,nSequence);
+	Add_SNACHeader(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_SENDMESSAGE,0,nSequence);
+
+	Add_u32_BE(pSts->nCookies1);
+	Add_u32_BE(pSts->nCookies2);
+	Add_u16_BE(0x0001);	// Channel
+	Add_string08(pSts->pszUIN);
+	Add_u16_BE(0x0002);
+	Add_u16_BE(0x000E+nMessageSize);
+	Add_u8(0x05);
+	Add_u8(0x01);
+	Add_u16_BE(0x0002);
+	Add_u16_BE(0x0106);
+	Add_u8(0x01);
+	Add_u8(0x01);
+	Add_u16_BE(0x0004+nMessageSize);
+	Add_u16_BE(0x0002);
+	Add_u16_BE(0x0000);
+	Add_blob(pMemory,nMessageSize);
+	Add_TLV_blob(ICQ_TLV_USERSTATUS,0,0);
+
+	_Free(pMemory);
 
 #ifdef  _DEBUG
 	//##################################################
