@@ -10,6 +10,7 @@
 
 //! \defgroup sicq SICQ
 //! \{
+	
 //! A class for low-level work with ICQ-packets
 class ICQPacket
 {
@@ -30,6 +31,7 @@ private:
 	int Add_u32_BE(unsigned int nU32);
 	int Add_blob(char *bData,int nDataSize);
 	int Add_string(TCHAR *pszString);
+	int Add_string08(TCHAR *pszString);
 	int Add_TLVHeader(unsigned short Type,unsigned short Length);
 	int Add_TLV_u16(unsigned short Type,unsigned short sU16);
 	int Add_TLV_u32(unsigned short Type,unsigned int nU32);

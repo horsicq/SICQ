@@ -101,6 +101,7 @@ struct SNAC_HEADER
 //! \defgroup oscar_snac_foodgroups_oservice Oservice
 //! \ingroup oscar_snac_foodgroups
 //! \{
+#define ICQ_SNAC_OSERVICE_ERROR				0x0001
 #define ICQ_SNAC_OSERVICE_CLIENTREADY		0x0002
 #define ICQ_SNAC_OSERVICE_FAMILIES			0x0003
 #define ICQ_SNAC_OSERVICE_REQUESTRATELIMITS	0x0006
@@ -118,19 +119,34 @@ struct SNAC_HEADER
 //! \defgroup oscar_snac_foodgroups_buddy Buddy
 //! \ingroup oscar_snac_foodgroups
 //! \{
+#define ICQ_SNAC_BUDDY_ERROR				0x0001
 #define ICQ_SNAC_BUDDY_REQUESTPARAMETERS	0x0002
 #define ICQ_SNAC_BUDDY_PARAMETERS			0x0003
+#define ICQ_SNAC_BUDDY_USERONLINE			0x000B
+#define ICQ_SNAC_BUDDY_USEROFFLINE			0x000C
 //! \}
 
 //! \defgroup oscar_snac_foodgroups_icbm ICBM
 //! \ingroup oscar_snac_foodgroups
 //! \{
+#define ICQ_SNAC_ICBM_ERROR					0x0001
 #define ICQ_SNAC_ICBM_SETPARAMETERS			0x0002
+#define ICQ_SNAC_ICBM_SENDMESSAGE			0x0006
+//! \}
+
+//! \defgroup oscar_snac_foodgroups_stats Stats
+//! \ingroup oscar_snac_foodgroups
+//! \{
+#define ICQ_SNAC_STATS_ERROR				0x0001
+#define ICQ_SNAC_STATS_SETMINIMUMINTERVAL	0x0002
+#define ICQ_SNAC_STATS_STATSREPORT			0x0003
+#define ICQ_SNAC_STATS_STATSREPORTACK		0x0004
 //! \}
 
 //! \defgroup oscar_snac_foodgroups_ssi SSI
 //! \ingroup oscar_snac_foodgroups
 //! \{
+#define ICQ_SNAC_SSI_ERROR					0x0001
 #define ICQ_SNAC_SSI_REQUESTROSTERFIRSTTIME	0x0004
 #define ICQ_SNAC_SSI_ROSTER					0x0006
 #define ICQ_SNAC_SSI_LOADROSTERAFTERLOGIN	0x0007

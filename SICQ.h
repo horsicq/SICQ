@@ -76,7 +76,7 @@ private:
 
 	int StatusToICQ(int nStatus);
 
-	void SendTextUnicode(SENDTEXTSTRUCT *sts);
+	void ICQSendText(SENDTEXTSTRUCT *pSts);
 
 	void DefProc();
 
