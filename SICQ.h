@@ -93,7 +93,7 @@ public:
 	bool Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
 
 	int SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength);
-	void SetStatus(int nStatus);
+	bool SetStatus(int nStatus);
 };
 //! \}
 

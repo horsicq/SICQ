@@ -39,7 +39,7 @@ private:
 	int Add_TLV_string(unsigned short Type,TCHAR *pszString);
 	int Add_TLV_empty(unsigned short Type);
 	int Add_TLV_password(unsigned short Type,TCHAR *pszPassword);
-	bool IsTLVPresent(unsigned short Type);
+	
 	char *GetTLVPointer(unsigned short Type);
 	unsigned short GetTLVTypeFromOffset(char *pOffset);
 	unsigned short GetTLVLehgthFromOffset(char *pOffset);
@@ -78,6 +78,10 @@ protected:
 	int CreateSendTextUnicodePacket(int nSequence,SENDTEXTSTRUCT *pSts);
 	bool IsErrorChannel();
 	bool IsSignOffChannel();
+	bool IsTLVPresent(unsigned short Type);
+	int CreatePlainLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
+	int CreateGoodByePacket(int nSequence);
+	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);
@@ -85,8 +89,5 @@ public:
 	int GetPacketSize();
 	int Recv(SOCKET sock);
 	int Send(SOCKET sock);
-	int CreatePlainLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
-	int CreateGoodByePacket(int nSequence);
-	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
 };
 //! \}

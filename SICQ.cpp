@@ -45,6 +45,9 @@ TCHAR *SICQ::GetErrorString()
 	case SICQ_ERROR_INCORRECTUINORPASSWORD:
 		pszErrorString=TEXT("Incorrect UIN or Password");
 		break;
+	case SICQ_ERROR_RATELIMITEXCEEDED:
+		pszErrorString=TEXT("Rate Limit Exceeded");
+		break;
 	default:
 		pszErrorString=TEXT("Unknown!!!");
 	}
@@ -148,24 +151,37 @@ bool SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPass
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN 
 //! \param pszText [in] a pointer to a buffer that contains a text message
 //! \param nTextLength [in] a length, in characters, of a text message
-//! \return Message ID
+//! \return Message ID or 0 if offline
 //! \note main window receives #WM_SICQ_MAINWND_SENDTEXT event
 int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 {
 	random rand;
 	SENDTEXTSTRUCT sts;
-	int nMessageID=rand.randomDWORD();
 
-	sts.MessageTime=_LocalTimeAsUnixTime();
-	sts.nCookies1=nMessageID;
-	sts.nCookies2=nMessageID;
-	sts.pszText=pszText;
-	sts.pszUIN=pszUIN;
-	sts.nTextLength=nTextLength;
+	if(this->nStatus!=SICQ_STATUS_OFFLINE)
+	{
+		int nMessageID=rand.randomDWORD();
 
-	SendMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
+		sts.MessageTime=_LocalTimeAsUnixTime();
+		sts.nCookies1=nMessageID;
+		sts.nCookies2=nMessageID;
+		sts.pszText=pszText;
+		sts.pszUIN=pszUIN;
+		sts.nTextLength=nTextLength;
 
-	return nMessageID;
+		SendMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
+
+		return nMessageID;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("Offline. Cannot send Text!!!"));
+		//##################################################
+#endif
+		return 0;
+	}
 }
 void SICQ::ICQSendText(SENDTEXTSTRUCT *pSts)
 {
@@ -175,9 +191,25 @@ void SICQ::ICQSendText(SENDTEXTSTRUCT *pSts)
 }
 //! Set Status
 //! \param nStatus ICQ Status
-void SICQ::SetStatus(int nStatus)
+//! \return true if success
+//! \return false if not
+bool SICQ::SetStatus(int nStatus)
 {
-	SendMessage(hEventWnd,WM_SICQ_EVENTWND_SETSTATUS,nStatus,0);
+	if(this->nStatus!=SICQ_STATUS_OFFLINE)
+	{
+		SendMessage(hEventWnd,WM_SICQ_EVENTWND_SETSTATUS,nStatus,0);
+
+		return true;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		_PrintTextNS(TEXT("Offline. Cannot set Status!!!"));
+		//##################################################
+#endif
+		return 0;
+	}
 }
 //! Login
 bool SICQ::ICQLogin()
@@ -207,32 +239,47 @@ bool SICQ::ICQLoginPlain()
 
 			if(IsSignOffChannel())
 			{
-				nCookiesSize=GetTLV_blob(ICQ_TLV_AUTHCOOKIE,Cookies,sizeof(Cookies));
-				GetTLV_string(ICQ_TLV_BOSSERVER,szBuffer,sizeof(szBuffer)/sizeof(TCHAR));
+				if(IsTLVPresent(ICQ_TLV_AUTHCOOKIE))
+				{
+					nCookiesSize=GetTLV_blob(ICQ_TLV_AUTHCOOKIE,Cookies,sizeof(Cookies));
+					GetTLV_string(ICQ_TLV_BOSSERVER,szBuffer,sizeof(szBuffer)/sizeof(TCHAR));
 
-				ICQBOSServerConnect(szBuffer,Cookies,sizeof(Cookies));
+					ICQBOSServerConnect(szBuffer,Cookies,sizeof(Cookies));
+				}
+				else if(IsTLVPresent(ICQ_TLV_AUTHERRORCODE))
+				{
+#ifdef  _DEBUG
+					//##################################################
+					_PrintTextNS(TEXT("Login Error!!!"));
+
+					TCHAR szBuffer[256];
+					wsprintf(szBuffer,TEXT("Auther Error Code %X"),GetTLV_u16(ICQ_TLV_AUTHERRORCODE));
+					_PrintTextNS(szBuffer);
+					//##################################################
+#endif
+
+					switch(GetTLV_u16(ICQ_TLV_AUTHERRORCODE))
+					{
+					case ICQ_AUTHERROR_INCORRECTNICKORPASS:
+					case ICQ_AUTHERROR_MISMATCHNICKORPASS:
+						nError=SICQ_ERROR_INCORRECTUINORPASSWORD;
+						break;
+					case ICQ_AUTHERROR_RATELIMITEXCEEDEDRES:
+						nError=SICQ_ERROR_RATELIMITEXCEEDED;
+						break;
+					default:
+						nError=SICQ_ERROR_UNKNOWN;
+					}
+				}
 			}
 			else
 			{
 #ifdef  _DEBUG
 				//##################################################
 				_PrintTextNS(TEXT("Login Error!!!"));
-
-				TCHAR szBuffer[256];
-				wsprintf(szBuffer,TEXT("Auther Error Code %X"),GetTLV_u16(ICQ_TLV_AUTHERRORCODE));
-				_PrintTextNS(szBuffer);
 				//##################################################
 #endif
-
-				switch(GetTLV_u16(ICQ_TLV_AUTHERRORCODE))
-				{
-				case ICQ_AUTHERROR_INCORRECTNICKORPASS:
-				case ICQ_AUTHERROR_MISMATCHNICKORPASS:
-					nError=SICQ_ERROR_INCORRECTUINORPASSWORD;
-					break;
-				default:
-					nError=SICQ_ERROR_UNKNOWN;
-				}
+				nError=SICQ_ERROR_UNKNOWN;
 			}
 		}
 	}
@@ -250,6 +297,7 @@ bool SICQ::ICQLoginPlain()
 	else
 	{
 		SendMessage(hMainWnd,WM_SICQ_MAINWND_LOGIN,0,(LPARAM)this);
+		nStatus=SICQ_STATUS_OFFLINE;
 		return false;
 	}
 	
