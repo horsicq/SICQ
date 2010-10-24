@@ -12,7 +12,7 @@ bool _LoadWS()
 
 #ifdef  _DEBUG
 //##################################################
-	_PrintTextNS(TEXT("Load Win Socket"));
+	_PrintDebugTextNS(TEXT("Load Win Socket"));
 //##################################################
 #endif
 
@@ -24,21 +24,44 @@ void _UnloadWS()
 {
 #ifdef  _DEBUG
 //##################################################
-	_PrintTextNS(TEXT("Unload Win Socket"));
+	_PrintDebugTextNS(TEXT("Unload Win Socket"));
 //##################################################
 #endif
 	WSACleanup();
 }
 //! The _socket function creates a socket
-//! \return If no error occurs, socket returns a descriptor referencing the new socket.
+//! \return if no error occurs, _socket returns a descriptor referencing the new socket. If error 0;
 SOCKET _socket()
 {
+	int nResult=0;
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("Create Socket"));
+	_PrintDebugTextNS(TEXT("Create Socket"));
 	//##################################################
 #endif
-	return socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	nResult=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if(nResult!=SOCKET_ERROR)
+	{
+		return nResult;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		char szBuffer[256];
+		wsprintf(szBuffer,TEXT("Socket Error!!!(%X code)"),WSAGetLastError());
+		_PrintDebugTextNS(szBuffer);
+		LPVOID lpMsgBuf;
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
+			NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR) &lpMsgBuf, 0, NULL);
+		_PrintDebugTextNS((PTSTR)lpMsgBuf);
+
+		//##################################################
+#endif
+		return 0;
+	}
 }
 //! The _connect function establishes a connection
 //! \param sock [in] a descriptor identifying an unconnected socket
@@ -50,6 +73,7 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 {
 	sockaddr_in sa;
 	char szBuffer[256];
+	int nResult=0;
 
 	_StringToChars(szBuffer,sizeof(szBuffer),pszServerIP);
 
@@ -59,16 +83,40 @@ bool _connect(SOCKET sock,TCHAR *pszServerIP,int nServerPort)
 
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("Connect"));
+	_PrintDebugTextNS(TEXT("Connect"));
 	TCHAR szBuffer2[256];
 	wsprintf(szBuffer2,TEXT("Server IP: %s"),pszServerIP);
-	_PrintTextNS(szBuffer2);
+	_PrintDebugTextNS(szBuffer2);
 	wsprintf(szBuffer2,TEXT("Server port: %d"),nServerPort);
-	_PrintTextNS(szBuffer2);
+	_PrintDebugTextNS(szBuffer2);
 	//##################################################
 #endif
 
-	return (connect(sock,(const sockaddr *)&sa,sizeof(sa))!= SOCKET_ERROR);
+	nResult=connect(sock,(const sockaddr *)&sa,sizeof(sa));
+
+	if(nResult!=SOCKET_ERROR)
+	{
+		return true;
+	}
+	else
+	{
+#ifdef  _DEBUG
+		//##################################################
+		wsprintf(szBuffer,TEXT("Socket Error!!!(%X code)"),WSAGetLastError());
+		_PrintDebugTextNS(szBuffer);
+		LPVOID lpMsgBuf;
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
+			NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR) &lpMsgBuf, 0, NULL);
+		_PrintDebugTextNS((PTSTR)lpMsgBuf);
+
+		//##################################################
+#endif
+		return false;
+	}
+
+	
 	
 }
 //! The _recv function receives data from a connected socket 
@@ -106,13 +154,13 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 #ifdef  _DEBUG
 			//##################################################
 			wsprintf(szBuffer,TEXT("Socket Error!!!(%X code)"),WSAGetLastError());
-			_PrintTextNS(szBuffer);
+			_PrintDebugTextNS(szBuffer);
 			LPVOID lpMsgBuf;
 			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
 				FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
 				NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 				(LPTSTR) &lpMsgBuf, 0, NULL);
-			_PrintTextNS((PTSTR)lpMsgBuf);
+			_PrintDebugTextNS((PTSTR)lpMsgBuf);
 
 			//##################################################
 #endif
@@ -124,7 +172,7 @@ int _recv(SOCKET sock,char *pBuffer,int nBufferSize)
 	//##################################################
 
 	wsprintf(szBuffer,TEXT("Recv %d(%X) bytes"),nSize,nSize);
-	_PrintTextNS(szBuffer);
+	_PrintDebugTextNS(szBuffer);
 	//##################################################
 #endif
 
@@ -151,7 +199,7 @@ int _send(SOCKET sock,char *pBuffer,int nBufferSize)
 	//##################################################
 	TCHAR szBuffer[256];
 	wsprintf(szBuffer,TEXT("Send %d(%X) bytes"),nSize,nSize);
-	_PrintTextNS(szBuffer);
+	_PrintDebugTextNS(szBuffer);
 	//##################################################
 #endif
 
@@ -163,7 +211,7 @@ void _closeconnect(SOCKET sock)
 {
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("Close Socket"));
+	_PrintDebugTextNS(TEXT("Close Socket"));
 	//##################################################
 #endif
 

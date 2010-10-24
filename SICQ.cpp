@@ -182,7 +182,7 @@ int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 	{
 #ifdef  _DEBUG
 		//##################################################
-		_PrintTextNS(TEXT("Offline. Cannot send Text!!!"));
+		_PrintDebugTextNS(TEXT("Offline. Cannot send Text!!!"));
 		//##################################################
 #endif
 		return 0;
@@ -210,7 +210,7 @@ bool SICQ::SetStatus(int nStatus)
 	{
 #ifdef  _DEBUG
 		//##################################################
-		_PrintTextNS(TEXT("Offline. Cannot set Status!!!"));
+		_PrintDebugTextNS(TEXT("Offline. Cannot set Status!!!"));
 		//##################################################
 #endif
 		return 0;
@@ -255,11 +255,11 @@ bool SICQ::ICQLoginPlain()
 				{
 #ifdef  _DEBUG
 					//##################################################
-					_PrintTextNS(TEXT("Login Error!!!"));
+					_PrintDebugTextNS(TEXT("Login Error!!!"));
 
 					TCHAR szBuffer[256];
 					wsprintf(szBuffer,TEXT("Auther Error Code %X"),GetTLV_u16(ICQ_TLV_AUTHERRORCODE));
-					_PrintTextNS(szBuffer);
+					_PrintDebugTextNS(szBuffer);
 					//##################################################
 #endif
 
@@ -281,7 +281,7 @@ bool SICQ::ICQLoginPlain()
 			{
 #ifdef  _DEBUG
 				//##################################################
-				_PrintTextNS(TEXT("Login Error!!!"));
+				_PrintDebugTextNS(TEXT("Login Error!!!"));
 				//##################################################
 #endif
 				nError=SICQ_ERROR_UNKNOWN;
@@ -409,7 +409,7 @@ void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int n
 	// BOS Server Connection
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("BOS Server connection"));
+	_PrintDebugTextNS(TEXT("BOS Server connection"));
 	//##################################################
 #endif
 	sock=_socket();
@@ -501,7 +501,7 @@ void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int n
 			{
 #ifdef  _DEBUG
 				//##################################################
-				_PrintTextNS(TEXT("Unknown"));
+				_PrintDebugTextNS(TEXT("Unknown"));
 				//##################################################
 #endif
 			}
@@ -516,7 +516,7 @@ void SICQ::DefProc()
 {
 #ifdef  _DEBUG
 	//##################################################
-	_PrintTextNS(TEXT("Recv Data"));
+	_PrintDebugTextNS(TEXT("Recv Data"));
 	//##################################################
 #endif
 	while(Recv(sock))
