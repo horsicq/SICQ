@@ -1,4 +1,3 @@
-#include "StdAfx.h"
 #include "List.h"
 
 //! Constructor

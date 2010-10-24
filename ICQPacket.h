@@ -1,10 +1,10 @@
 //! \file ICQPacket.h Header for ICQPacket.cpp
 #pragma once
 
-#include "ICQPacket_define.h"
 #include "Utils.h"
 #include "Strings.h"
 #include "Net.h"
+#include "ICQPacket_define.h"
 
 
 

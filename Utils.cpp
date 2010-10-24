@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Utils.h"
 
 //! Fills a block of memory with zeros

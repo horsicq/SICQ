@@ -1,5 +1,4 @@
 #include "Time.h"
-#include "StdAfx.h"
 
 //! _FileTimeToUnixTime
 //! \param pFileTeme [in] a pointer to a buffer that contains FILETIME struct
@@ -61,7 +60,7 @@ int _UnixTimeAsString(int nUnixTime,PTSTR pszString,int nStringLength)
 
 	FileTimeToSystemTime(&ft,&st);
 
-	wsprintf(szBuffer,_TEXT("%d:%d:%d %d.%d.%d"),st.wHour,st.wMinute,st.wSecond,st.wDay,st.wMonth,st.wYear);
+	wsprintf(szBuffer,TEXT("%d:%d:%d %d.%d.%d"),st.wHour,st.wMinute,st.wSecond,st.wDay,st.wMonth,st.wYear);
 
 	nResultLenght=lstrlen(szBuffer);
 	

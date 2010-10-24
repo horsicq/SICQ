@@ -1,9 +1,8 @@
-#include "StdAfx.h"
 #include "SICQ.h"
 
 //! Constructor
-//! \param [in] hMainWnd a handle to the window whose window procedure will receive the message
-SICQ::SICQ(HWND hMainWnd)
+
+SICQ::SICQ()
 {
 
 	this->hMainWnd=hMainWnd;
@@ -20,6 +19,12 @@ SICQ::SICQ(HWND hMainWnd)
 SICQ::~SICQ(void)
 {
 	Stop();
+}
+//! SetWindowsHandle
+//! \param [in] hMainWnd a handle to the window whose window procedure will receive the message
+void SICQ::SetWindowsHandle(HWND hWnd)
+{
+	this->hMainWnd=hWnd;
 }
 
 //! Get Last Error
@@ -390,7 +395,7 @@ void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int n
 	TCHAR szBOSServer[64],*pszOffset;
 	int nBOSServerPort;
 
-	pszOffset=StrStr(pszBOSServerIPAndPort,_TEXT(":"));
+	pszOffset=StrStr(pszBOSServerIPAndPort,TEXT(":"));
 	pszOffset++;
 	lstrcpyn(szBOSServer,pszBOSServerIPAndPort,(pszOffset-pszBOSServerIPAndPort));
 	nBOSServerPort=StrToInt(pszOffset);

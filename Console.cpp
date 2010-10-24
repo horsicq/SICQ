@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Console.h"
 
 //! Writes a character string to a console screen buffer beginning at the current cursor location.

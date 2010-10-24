@@ -83,8 +83,10 @@ private:
 	// CALLBACK function
 	static LRESULT CALLBACK SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 public:
-	SICQ(HWND hMainWnd);
+	SICQ();
 	~SICQ(void);
+
+	void SetWindowsHandle(HWND hWnd);
 
 	// Get Last Error
 	TCHAR *GetErrorString();

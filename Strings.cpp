@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Strings.h"
 
 //! \note Convert string(TCHAR[]) to chars.
@@ -66,7 +65,7 @@ int _BinToHEXTable(char *pData,int nDataSize,TCHAR *pszHEX)
 		lstrcat(pszHEX,szBuffer);
 		_BinToHEX(pData+i,_MinInt(8,nDataSize-i),szBuffer);
 		lstrcat(pszHEX,szBuffer);
-		lstrcat(pszHEX,_TEXT("\n"));
+		lstrcat(pszHEX,TEXT("\n"));
 	}
 
 	return lstrlen(pszHEX);
@@ -83,7 +82,7 @@ int _StringToUnicode(WCHAR *pszUnicode,int nUnicodeLength,TCHAR *pszString)
 	lstrcpyn(pszUnicode,pszString,nUnicodeLength);
 	return lstrlen(pszString);
 #else
-	return _CharsToUnicode(pszString,nStringLength,pszChars);
+	return _CharsToUnicode(pszUnicode,nUnicodeLength,pszString);
 #endif
 }
 //! \note Convert Unicode(WCHAR[]) to string(TCHAR[])
@@ -98,7 +97,7 @@ int _UnicodeToString(TCHAR *pszString,int nStringLength,WCHAR *pszUnicode)
 	lstrcpyn(pszString,pszUnicode,nStringLength);
 	return lstrlen(pszUnicode);
 #else
-	return _UnicodeToChars(pszChars,nCharsSize,pszString);
+	return _UnicodeToChars(pszString,nStringLength,pszUnicode);
 #endif
 }
 //! \note Convert chars to Unicode(WCHAR[]).
