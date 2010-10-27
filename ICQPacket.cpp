@@ -628,9 +628,25 @@ bool ICQPacket::IsSNACPresent(unsigned short family,unsigned short subtype)
 		}
 		else if(family==ICQ_SNAC_FOODGROUP_ICBM)
 		{
-			if(subtype==ICQ_SNAC_ICBM_SETPARAMETERS)
+			if(subtype==ICQ_SNAC_ICBM_ERROR)
+			{
+				_PrintDebugTextNS(TEXT("Buddy: Error"));
+			}
+			else if(subtype==ICQ_SNAC_ICBM_SETPARAMETERS)
 			{
 				_PrintDebugTextNS(TEXT("ICBM: Set Parameters"));
+			}
+			else if(subtype==ICQ_SNAC_ICBM_SENDMESSAGE)
+			{
+				_PrintDebugTextNS(TEXT("ICBM: Send Message"));
+			}
+			else if(subtype==ICQ_SNAC_ICBM_RECVMESSAGE)
+			{
+				_PrintDebugTextNS(TEXT("ICBM: Recv Message"));
+			}
+			else if(subtype==ICQ_SNAC_ICBM_MESSAGEACK)
+			{
+				_PrintDebugTextNS(TEXT("ICBM: Message Ack"));
 			}
 		}
 		else if(family==ICQ_SNAC_FOODGROUP_STATS)
@@ -850,6 +866,22 @@ unsigned int ICQPacket::Get_u32_BE_FromOffset(char *pOffset)
 unsigned short ICQPacket::Get_u16_BE_FromOffset(char *pOffset)
 {
 	return ntohs(*((unsigned short *)pOffset));
+}
+unsigned char ICQPacket::Get_u8_FromOffset(char *pOffset)
+{
+	return *pOffset;
+}
+int ICQPacket::Get_string08(char *pOffset,TCHAR *pszString,int nStringLength)
+{
+	int nSize=Get_u8_FromOffset(pOffset);
+
+	if(nSize<nStringLength)
+	{
+		pOffset++;
+		return _CharsToString(pszString,nStringLength,pOffset);
+	}
+
+	return 0;
 }
 
 int ICQPacket::Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid)
@@ -1204,8 +1236,8 @@ int ICQPacket::CreateSendTextUnicodePacket(int nSequence,SENDTEXTSTRUCT *pSts)
 	SetFLAPHeader(ICQ_FLAP_CHANNEL_SNACDATA,nSequence);
 	Add_SNACHeader(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_SENDMESSAGE,0,nSequence);
 
-	Add_u32_BE(pSts->nCookies1);
-	Add_u32_BE(pSts->nCookies2);
+	Add_u32_BE(pSts->cookie.nCookies1);
+	Add_u32_BE(pSts->cookie.nCookies2);
 	Add_u16_BE(0x0001);	// Channel
 	Add_string08(pSts->pszUIN);
 	Add_u16_BE(0x0002);
@@ -1233,4 +1265,105 @@ int ICQPacket::CreateSendTextUnicodePacket(int nSequence,SENDTEXTSTRUCT *pSts)
 #endif
 
 	return nPacketSize;
+}
+bool ICQPacket::ReadMessageAckPacket(MESSAGEACKSTRUCT *pMas)
+{
+	int nSize=GetSNACDataSize();
+	char *pOffset=GetSNACDataPointer();
+
+	if(nSize&&IsSNACPresent(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_MESSAGEACK))
+	{
+		pMas->cookie.nCookies1=Get_u32_BE_FromOffset(pOffset);
+		pOffset+=4;
+		pMas->cookie.nCookies2=Get_u32_BE_FromOffset(pOffset);
+		pOffset+=4;
+		pMas->sChannel=Get_u16_BE_FromOffset(pOffset);
+		pOffset+=2;
+		Get_string08(pOffset,pMas->szUIN,sizeof(pMas->szUIN));
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+bool ICQPacket::ReadRecvMessagePacket(RECVMESSAGESTRUCT *pRms)
+{
+	
+	int nSize=GetSNACDataSize();
+	char *pOffset=GetSNACDataPointer();
+
+	if(nSize&&IsSNACPresent(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_RECVMESSAGE))
+	{
+		pRms->cookie.nCookies1=Get_u32_BE_FromOffset(pOffset);
+		pOffset+=4;
+		pRms->cookie.nCookies2=Get_u32_BE_FromOffset(pOffset);
+		pOffset+=4;
+		pRms->sChannel=Get_u16_BE_FromOffset(pOffset);
+		pOffset+=2;
+		
+		pOffset+=ReadNickInfoFromOffset(pOffset,&(pRms->NickInfo));
+
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+int ICQPacket::ReadNickInfoFromOffset(char *pOffset,NICKINFOSTRUCT *pNis)
+{
+	int nTLVs=0;
+	short sTLVType,sTLVLength;
+	char *pData=pOffset;
+
+	pData+=Get_string08(pData,pNis->szUIN,sizeof(pNis->szUIN));
+	pData++;
+	pNis->sWarningLevel=Get_u16_BE_FromOffset(pData);
+	pData+=2;
+	nTLVs=Get_u16_BE_FromOffset(pData);
+	pData+=2;
+
+	for(int i=0;i<nTLVs;i++)
+	{
+		sTLVType=GetTLVTypeFromOffset(pOffset);
+		sTLVLength=GetTLVLehgthFromOffset(pOffset);
+		pData+=sizeof(TLV_HEADER);
+
+		if(sTLVType==0x0001) // User Class
+		{
+			
+		}
+		else if(sTLVType==0x0003) // Online since
+		{
+			
+		}
+		else if(sTLVType==0x0005) // Registered
+		{
+			
+		}
+		else if(sTLVType==0x0006) // Status
+		{
+			
+		}
+		else if(sTLVType==0x000A) // 
+		{
+			
+		}
+		else if(sTLVType==0x000C) // CliToCli
+		{
+			
+		}
+		else if(sTLVType==0x000F) // Session Timer
+		{
+			
+		}
+
+		pData+=sTLVLength;
+	}
+
+
+	return pData-pOffset;
 }

@@ -54,9 +54,12 @@ private:
 
 	unsigned int Get_u32_BE_FromOffset(char *pOffset);
 	unsigned short Get_u16_BE_FromOffset(char *pOffset);
+	unsigned char Get_u8_FromOffset(char *pOffset);
+	int Get_string08(char *pOffset,TCHAR *pszString,int nStringLength);
 
 	int Add_SNACHeader(unsigned short family,unsigned short subtype,unsigned short flags,unsigned int requestid);
-
+	
+	int ReadNickInfoFromOffset(char *pOffset,NICKINFOSTRUCT *pNis); 
 protected:
 	int GetTLV_blob(unsigned short Type,char *pBuffer,int nBufferSize);
 	int GetTLV_string(unsigned short Type,TCHAR *pszBuffer,int nBufferLength);
@@ -82,6 +85,8 @@ protected:
 	int CreatePlainLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
 	int CreateGoodByePacket(int nSequence);
 	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
+	bool ReadMessageAckPacket(MESSAGEACKSTRUCT *pMas);
+	bool ReadRecvMessagePacket(RECVMESSAGESTRUCT *pRms);
 public:
 	ICQPacket(void);
 	~ICQPacket(void);

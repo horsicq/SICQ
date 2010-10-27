@@ -132,6 +132,8 @@ struct SNAC_HEADER
 #define ICQ_SNAC_ICBM_ERROR					0x0001
 #define ICQ_SNAC_ICBM_SETPARAMETERS			0x0002
 #define ICQ_SNAC_ICBM_SENDMESSAGE			0x0006
+#define ICQ_SNAC_ICBM_RECVMESSAGE			0x0007
+#define ICQ_SNAC_ICBM_MESSAGEACK			0x000C
 //! \}
 
 //! \defgroup oscar_snac_foodgroups_stats Stats
@@ -236,13 +238,34 @@ struct FOODGROUPS
 	FOODGROUP Unk2;
 	FOODGROUP Unk3;
 };
+struct ICBMCOOKIESTRUCT
+{
+	int nCookies1;
+	int nCookies2;
+};
 struct SENDTEXTSTRUCT
 {
 	int MessageTime;
 	TCHAR *pszUIN;
-	int nCookies1;
-	int nCookies2;
+	ICBMCOOKIESTRUCT cookie;
 	TCHAR *pszText;
 	int nTextLength;
+};
+struct NICKINFOSTRUCT
+{
+	TCHAR szUIN[16];
+	short sWarningLevel;
+};
+struct MESSAGEACKSTRUCT
+{
+	ICBMCOOKIESTRUCT cookie;
+	short sChannel;
+	TCHAR szUIN[16];
+};
+struct RECVMESSAGESTRUCT
+{
+	ICBMCOOKIESTRUCT cookie;
+	short sChannel;
+	NICKINFOSTRUCT NickInfo;
 };
 //! \}

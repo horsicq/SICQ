@@ -22,9 +22,9 @@ SICQ::~SICQ(void)
 }
 //! SetWindowsHandle
 //! \param [in] hMainWnd a handle to the window whose window procedure will receive the message
-void SICQ::SetWindowsHandle(HWND hWnd)
+void SICQ::SetWindowsHandle(HWND hMainWnd)
 {
-	this->hMainWnd=hWnd;
+	this->hMainWnd=hMainWnd;
 }
 
 //! Get Last Error
@@ -140,17 +140,15 @@ bool SICQ::Stop()
 //! \param nServerPort [in] a port of ICQ server ( usually 5190 )
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN
 //! \param pszPassword [in] a pointer to a buffer that contains ICQ Password
-//! \return true  if success
-//! \return false if fail
 //! \note main window receives #WM_SICQ_MAINWND_LOGIN event
-bool SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword)
+void SICQ::Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword)
 {
 	lstrcpyn(szServerIP,pszServerIP,16);
 	this->nServerPort=nServerPort;
 	lstrcpyn(szUIN,pszUIN,16);
 	lstrcpyn(szPassword,pszPassword,16);
 
-	return SendMessage(hEventWnd,WM_SICQ_EVENTWND_LOGIN,0,0)==1;
+	PostMessage(hEventWnd,WM_SICQ_EVENTWND_LOGIN,0,0);
 }
 //! Send Text
 //! \param pszUIN [in] a pointer to a buffer that contains ICQ UIN 
@@ -168,13 +166,13 @@ int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 		int nMessageID=rand.randomDWORD();
 
 		sts.MessageTime=_LocalTimeAsUnixTime();
-		sts.nCookies1=nMessageID;
-		sts.nCookies2=nMessageID;
+		sts.cookie.nCookies1=nMessageID;
+		sts.cookie.nCookies2=nMessageID;
 		sts.pszText=pszText;
 		sts.pszUIN=pszUIN;
 		sts.nTextLength=nTextLength;
 
-		SendMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
+		PostMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
 
 		return nMessageID;
 	}
@@ -202,7 +200,7 @@ bool SICQ::SetStatus(int nStatus)
 {
 	if(this->nStatus!=SICQ_STATUS_OFFLINE)
 	{
-		SendMessage(hEventWnd,WM_SICQ_EVENTWND_SETSTATUS,nStatus,0);
+		PostMessage(hEventWnd,WM_SICQ_EVENTWND_SETSTATUS,nStatus,0);
 
 		return true;
 	}
@@ -373,11 +371,7 @@ void SICQ::ICQSetStatus(int nStatus)
 	{
 		if(this->nStatus==SICQ_STATUS_OFFLINE)
 		{
-			CreateGoodByePacket(nSequence);
-			Send(sock);
-			SequenceIncrement();
-
-			_closeconnect(sock);
+			nStatus=SICQ_STATUS_OFFLINE;
 		}
 		else
 		{
@@ -386,7 +380,7 @@ void SICQ::ICQSetStatus(int nStatus)
 			SequenceIncrement();
 		}
 	}
-
+	SendMessage(hMainWnd,WM_SICQ_MAINWND_STATUS,nStatus,(LPARAM)this);
 	this->nStatus=nStatus;
 }
 
@@ -514,6 +508,8 @@ void SICQ::ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int n
 }
 void SICQ::DefProc()
 {
+	MESSAGEACKSTRUCT mas;
+	RECVMESSAGESTRUCT rms;
 #ifdef  _DEBUG
 	//##################################################
 	_PrintDebugTextNS(TEXT("Recv Data"));
@@ -536,6 +532,16 @@ void SICQ::DefProc()
 		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_BUDDY,ICQ_SNAC_BUDDY_USEROFFLINE))
 		{
 
+		}
+		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_RECVMESSAGE))
+		{
+			ReadRecvMessagePacket(&rms);
+		}
+		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_MESSAGEACK))
+		{
+			ReadMessageAckPacket(&mas);
+
+			SendMessage(hMainWnd,WM_SICQ_MAINWND_MESSAGEACK,mas.cookie.nCookies1,(LPARAM)this);
 		}
 	}
 }

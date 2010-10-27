@@ -19,6 +19,8 @@
 
 #define WM_SICQ_EVENTWND_RECVDATA			WM_USER+104
 
+//! \defgroup statuses Statuses
+//! \{
 #define SICQ_STATUS_OFFLINE					0
 #define SICQ_STATUS_ONLINE					1
 #define SICQ_STATUS_AWAY					2
@@ -27,6 +29,7 @@
 #define SICQ_STATUS_OCCUPIED				5
 #define SICQ_STATUS_FREEFORCHAT				6
 #define SICQ_STATUS_INVISIBLE				7
+//! \}
 
 
 //! \defgroup messages Messages
@@ -40,6 +43,14 @@
 //! \param wParam true if success, false if fail
 //! \param lParam a pointer to SICQ class
 #define WM_SICQ_MAINWND_SENDTEXT			WM_USER+201
-
+//! Status
+//! \param wParam Status
+//! \param lParam a pointer to SICQ class
+//! \sa statuses
+#define WM_SICQ_MAINWND_STATUS				WM_USER+202
+//! MessageAck
+//! \param wParam MessageID
+//! \param lParam a pointer to SICQ class
+#define WM_SICQ_MAINWND_MESSAGEACK			WM_USER+203
 //! \}
 

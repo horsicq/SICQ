@@ -86,13 +86,13 @@ public:
 	SICQ();
 	~SICQ(void);
 
-	void SetWindowsHandle(HWND hWnd);
+	void SetWindowsHandle(HWND hMainWnd);
 
 	// Get Last Error
 	TCHAR *GetErrorString();
 	
 	// Login
-	bool Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
+	void Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
 
 	int SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength);
 	bool SetStatus(int nStatus);
