@@ -39,23 +39,19 @@
 //! \param wParam true if success, false if fail
 //! \param lParam a pointer to SICQ class
 #define WM_SICQ_MAINWND_LOGIN				WM_USER+200
-//! SendText
-//! \param wParam true if success, false if fail
-//! \param lParam a pointer to SICQ class
-#define WM_SICQ_MAINWND_SENDTEXT			WM_USER+201
 //! Status
 //! \param wParam Status
 //! \param lParam a pointer to SICQ class
 //! \sa statuses
-#define WM_SICQ_MAINWND_STATUS				WM_USER+202
+#define WM_SICQ_MAINWND_STATUS				WM_USER+201
 //! MessageAck
 //! \param wParam MessageID
 //! \param lParam a pointer to SICQ class
-#define WM_SICQ_MAINWND_MESSAGEACK			WM_USER+203
+#define WM_SICQ_MAINWND_MESSAGEACK			WM_USER+202
 //! RecvText
 //! \param wParam a pointer to RECVMESSAGESTRUCT
 //! \param lParam a pointer to SICQ class
 //! \sa RECVMESSAGESTRUCT
-#define WM_SICQ_MAINWND_RECVTEXT			WM_USER+204
+#define WM_SICQ_MAINWND_RECVTEXT			WM_USER+203
 //! \}
 
