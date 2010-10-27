@@ -51,35 +51,22 @@ private:
 	SOCKET sock;
 	int nSequence;
 	int nStatus;
-
 	static char HwndList[1000];
-
 	FOODGROUPS FoodGroups;
 	HWND hMainWnd;
 
 	void SequenceIncrement();
-
-	// Start
 	bool Start();
-	// Stop
 	bool Stop();
-
 	bool ICQLogin();
-	// ICQ Login
 	bool ICQLoginPlain();
-	// ICQ Login MD5
 	bool ICQLoginMD5();
-
 	void ICQBOSServerConnect(TCHAR *pszBOSServerIPAndPort,char *pCookies,int nCookiesSize);
-
 	void ICQSetStatus(int nStatus);
-
 	int StatusToICQ(int nStatus);
-
 	void ICQSendText(SENDTEXTSTRUCT *pSts);
-
+	void ICQPing();
 	void DefProc();
-
 	// CALLBACK function
 	static LRESULT CALLBACK SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 public:
@@ -87,13 +74,8 @@ public:
 	~SICQ(void);
 
 	void SetWindowsHandle(HWND hMainWnd);
-
-	// Get Last Error
 	TCHAR *GetErrorString();
-	
-	// Login
 	void Login(TCHAR *pszServerIP,int nServerPort,TCHAR *pszUIN,TCHAR *pszPassword);
-
 	int SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength);
 	bool SetStatus(int nStatus);
 };

@@ -172,7 +172,7 @@ int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 		sts.pszUIN=pszUIN;
 		sts.nTextLength=nTextLength;
 
-		PostMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
+		SendMessage(hEventWnd,WM_SICQ_EVENTWND_SENDMESSAGE,0,(LPARAM)&sts);
 
 		return nMessageID;
 	}
@@ -188,9 +188,21 @@ int SICQ::SendText(TCHAR *pszUIN,TCHAR *pszText,int nTextLength)
 }
 void SICQ::ICQSendText(SENDTEXTSTRUCT *pSts)
 {
-	CreateSendTextUnicodePacket(nSequence,pSts);
-	Send(sock);
-	SequenceIncrement();
+	if(this->nStatus!=SICQ_STATUS_OFFLINE)
+	{
+		CreateSendTextUnicodePacket(nSequence,pSts);
+		Send(sock);
+		SequenceIncrement();
+	}
+}
+void SICQ::ICQPing()
+{
+	if(this->nStatus!=SICQ_STATUS_OFFLINE)
+	{
+		CreatePingPacket(nSequence);
+		Send(sock);
+		SequenceIncrement();
+	}
 }
 //! Set Status
 //! \param nStatus ICQ Status
@@ -536,11 +548,11 @@ void SICQ::DefProc()
 		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_RECVMESSAGE))
 		{
 			ReadRecvMessagePacket(&rms);
+			SendMessage(hMainWnd,WM_SICQ_MAINWND_RECVTEXT,(WPARAM)(&rms),(LPARAM)this);
 		}
 		else if(IsSNACPresent(ICQ_SNAC_FOODGROUP_ICBM,ICQ_SNAC_ICBM_MESSAGEACK))
 		{
 			ReadMessageAckPacket(&mas);
-
 			SendMessage(hMainWnd,WM_SICQ_MAINWND_MESSAGEACK,mas.cookie.nCookies1,(LPARAM)this);
 		}
 	}
@@ -557,6 +569,8 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	switch (message)
 	{
 	case WM_CREATE:
+
+		SetTimer(hWnd,(int)hWnd,60000,0);
 
 		break;
 
@@ -601,7 +615,17 @@ LRESULT CALLBACK SICQ::SocketProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 		break;
 
+	case WM_TIMER:
+
+		_list.SetData(HwndList,sizeof(HwndList));
+		pSICQ=(SICQ *)(*((int *)_list.GetEntryByID((int)hWnd)));
+
+		pSICQ->ICQPing();
+
+		break;
 	case WM_DESTROY:
+
+		KillTimer(hWnd,(int)hWnd);
 
 		PostQuitMessage(0);
 		break;

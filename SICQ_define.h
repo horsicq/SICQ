@@ -52,5 +52,10 @@
 //! \param wParam MessageID
 //! \param lParam a pointer to SICQ class
 #define WM_SICQ_MAINWND_MESSAGEACK			WM_USER+203
+//! RecvText
+//! \param wParam a pointer to RECVMESSAGESTRUCT
+//! \param lParam a pointer to SICQ class
+//! \sa RECVMESSAGESTRUCT
+#define WM_SICQ_MAINWND_RECVTEXT			WM_USER+204
 //! \}
 

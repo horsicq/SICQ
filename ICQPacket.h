@@ -43,6 +43,7 @@ private:
 	char *GetTLVPointer(unsigned short Type);
 	unsigned short GetTLVTypeFromOffset(char *pOffset);
 	unsigned short GetTLVLehgthFromOffset(char *pOffset);
+	unsigned short GetFragmentLehgthFromOffset(char *pOffset);
 
 	char *GetSNACPointer();
 	unsigned short GetSNACFamily();
@@ -84,6 +85,7 @@ protected:
 	bool IsTLVPresent(unsigned short Type);
 	int CreatePlainLoginPacket(int nSequence,TCHAR *pszUIN,TCHAR *pszPassword);
 	int CreateGoodByePacket(int nSequence);
+	int CreatePingPacket(int nSequence);
 	int CreateCookiesPacket(int nSequence,char *pCookies,int nCookiesSize);
 	bool ReadMessageAckPacket(MESSAGEACKSTRUCT *pMas);
 	bool ReadRecvMessagePacket(RECVMESSAGESTRUCT *pRms);

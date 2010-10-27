@@ -342,6 +342,22 @@ int ICQPacket::CreateGoodByePacket(int nSequence)
 
 	return nPacketSize;
 }
+//! CreatePingPacket
+//! \param nSequence [in] a Sequence
+//! \return a size of ICQ Packet
+//! \sa FLAP_HEADER, TLV_HEADER
+int ICQPacket::CreatePingPacket(int nSequence)
+{
+	SetFLAPHeader(ICQ_FLAP_CHANNEL_KEEPALIVE,nSequence);
+
+#ifdef  _DEBUG
+	//##################################################
+	_PrintDebugTextNS(TEXT("Create Ping Packet"));
+	//##################################################
+#endif
+
+	return nPacketSize;
+}
 //! CreateSendCookiesPacket
 //! \param nSequence [in] a Sequence
 //! \param pCookies [in] a pointer to a buffer that contains cookies data
@@ -400,6 +416,10 @@ unsigned short ICQPacket::GetTLVTypeFromOffset(char *pOffset)
 unsigned short ICQPacket::GetTLVLehgthFromOffset(char *pOffset)
 {
 	return ntohs(((TLV_HEADER *)pOffset)->length);
+}
+unsigned short ICQPacket::GetFragmentLehgthFromOffset(char *pOffset)
+{
+	return ntohs(((FRAGMENT *)pOffset)->Length);
 }
 
 //! Get TLV bytes
@@ -1290,7 +1310,10 @@ bool ICQPacket::ReadMessageAckPacket(MESSAGEACKSTRUCT *pMas)
 }
 bool ICQPacket::ReadRecvMessagePacket(RECVMESSAGESTRUCT *pRms)
 {
-	
+	short sTLVType,sTLVLength,sEncode;
+	int nFragmentLength=0;
+	char *pData=0;
+	char Buffer[2048];
 	int nSize=GetSNACDataSize();
 	char *pOffset=GetSNACDataPointer();
 
@@ -1302,9 +1325,46 @@ bool ICQPacket::ReadRecvMessagePacket(RECVMESSAGESTRUCT *pRms)
 		pOffset+=4;
 		pRms->sChannel=Get_u16_BE_FromOffset(pOffset);
 		pOffset+=2;
-		
 		pOffset+=ReadNickInfoFromOffset(pOffset,&(pRms->NickInfo));
 
+		nSize-=pOffset-GetSNACDataPointer();
+
+		while(nSize>0)
+		{
+			sTLVType=GetTLVTypeFromOffset(pOffset);
+			sTLVLength=GetTLVLehgthFromOffset(pOffset);
+			pOffset+=sizeof(TLV_HEADER);
+			nSize-=sizeof(TLV_HEADER);
+
+			if(sTLVType==0x0002)
+			{
+				pData=pOffset;
+				nFragmentLength=GetFragmentLehgthFromOffset(pData);
+
+				pData+=sizeof(FRAGMENT);
+				pData+=nFragmentLength;
+
+				nFragmentLength=GetFragmentLehgthFromOffset(pData);
+
+				pData+=sizeof(FRAGMENT);
+				sEncode=Get_u16_BE_FromOffset(pData);
+				pData+=4;
+
+				switch(sEncode)
+				{
+				case 2:
+					_NetToUnicode((WCHAR *)Buffer,(nFragmentLength-4)/sizeof(WCHAR)+1,(WCHAR *)pData);
+					_UnicodeToString(pRms->szText,(nFragmentLength-4)/sizeof(WCHAR)+1,(WCHAR *)Buffer);
+					break;
+				default:
+					_CharsToString(pRms->szText,(nFragmentLength-4)+1,pData);
+				}
+
+			}
+
+			pOffset+=sTLVLength;
+			nSize-=sTLVLength;
+		}
 
 		return true;
 	}
@@ -1328,8 +1388,8 @@ int ICQPacket::ReadNickInfoFromOffset(char *pOffset,NICKINFOSTRUCT *pNis)
 
 	for(int i=0;i<nTLVs;i++)
 	{
-		sTLVType=GetTLVTypeFromOffset(pOffset);
-		sTLVLength=GetTLVLehgthFromOffset(pOffset);
+		sTLVType=GetTLVTypeFromOffset(pData);
+		sTLVLength=GetTLVLehgthFromOffset(pData);
 		pData+=sizeof(TLV_HEADER);
 
 		if(sTLVType==0x0001) // User Class

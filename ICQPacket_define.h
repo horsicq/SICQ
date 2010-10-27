@@ -267,5 +267,12 @@ struct RECVMESSAGESTRUCT
 	ICBMCOOKIESTRUCT cookie;
 	short sChannel;
 	NICKINFOSTRUCT NickInfo;
+	TCHAR szText[1024];
+};
+struct FRAGMENT
+{
+	unsigned char id;
+	unsigned char version;
+	unsigned short Length;
 };
 //! \}

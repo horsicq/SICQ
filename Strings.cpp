@@ -141,10 +141,11 @@ int _UnicodeToNet(WCHAR *pszNet,int nNetLength,WCHAR *pszUnicode)
 //! \return the number of bytes written to the buffer pointed to by pszUnicode.
 int _NetToUnicode(WCHAR *pszUnicode,int nUnicodeLength,WCHAR *pszNet)
 {
-	for(int i=0;i<nUnicodeLength;i++)
+	for(int i=0;i<nUnicodeLength-1;i++)
 	{
 		pszUnicode[i]=ntohs(pszNet[i]);
 	}
+	pszUnicode[nUnicodeLength-1]=0;
 
 	return nUnicodeLength;
 }

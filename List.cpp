@@ -68,6 +68,9 @@ bool List::RemoveEntry(int nID)
 {
 	if(IsList(pData,nDataSize))
 	{
+
+
+		return true;
 	}
 
 	return false;
